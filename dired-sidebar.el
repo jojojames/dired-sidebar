@@ -54,7 +54,8 @@
   (let ((map (make-sparse-keymap)))
     (define-key map [tab] 'dired-subtree-toggle)
     (with-eval-after-load 'evil
-      (evil-define-key 'normal map [tab] 'dired-subtree-toggle)))
+      (evil-define-key 'normal map [tab] 'dired-subtree-toggle))
+    map)
   "Keymap used for `dired-sidebar-mode'.")
 
 (define-minor-mode dired-sidebar-mode
