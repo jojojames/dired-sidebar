@@ -143,7 +143,8 @@ is true.")
         (rename-buffer name)))
     (if (get-buffer-window buffer)
         (dired-sidebar/hide-sidebar buffer)
-      (dired-sidebar/show-sidebar buffer root))))
+      (dired-sidebar/show-sidebar buffer root)
+      (pop-to-buffer buffer))))
 
 ;;;###autoload
 (defun dired-sidebar/show-sidebar (buffer dir)
