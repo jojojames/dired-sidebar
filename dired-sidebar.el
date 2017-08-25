@@ -101,13 +101,15 @@ is true.")
     (define-key map (kbd "RET") 'dired-sidebar/find-file)
     (define-key map (kbd "<return>") 'dired-sidebar/find-file)
     (define-key map "^" 'dired-sidebar/up-directory)
+    (define-key map (kbd "C-o") 'dired-sidebar/find-file-ace)
     (with-eval-after-load 'evil
       (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
         [tab] 'dired-subtree-toggle
         (kbd "C-m") 'dired-sidebar/find-file
         (kbd "RET") 'dired-sidebar/find-file
         (kbd "<return>") 'dired-sidebar/find-file
-        "^" 'dired-sidebar/up-directory))
+        "^" 'dired-sidebar/up-directory
+        (kbd "C-o") 'dired-sidebar/find-file-ace))
     map)
   "Keymap used for `dired-sidebar-mode'.")
 
@@ -166,7 +168,7 @@ the frame and makes it a dedicated window for that buffer."
   "Hide the sidebar window."
   (delete-window (get-buffer-window buffer)))
 
-(defun dired-sidebar/find-file ()
+(defun dired-sidebar/find-file (&optional ace)
   "Wrapper over `dired-find-file'."
   (interactive)
   (let ((find-file-run-dired t)
@@ -176,8 +178,17 @@ the frame and makes it a dedicated window for that buffer."
          ;; Copied from `dired-find-file'.
          (find-file dired-file-name)
          (dired-sidebar-mode))
-      ;; Copied from `dired-display-file'.
-      (display-buffer (find-file-noselect dired-file-name) t))))
+      (select-window (if (and ace
+                              (fboundp 'aw-select))
+                         (aw-select "Select buffer")
+                       (next-window)))
+      (find-file dired-file-name))))
+
+(defun dired-sidebar/find-file-ace ()
+  "Wrapper over `dired-find-file' but open file using `ace-window'
+if file was a file and not a directory."
+  (interactive)
+  (dired-sidebar/find-file :ace))
 
 (defun dired-sidebar/up-directory ()
   "Wrapper over `dired-up-directory'."
