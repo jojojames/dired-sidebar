@@ -52,6 +52,36 @@
 (require 'face-remap)
 (require 'projectile nil t)
 
+;; Customizations
+
+(defgroup dired-sidebar nil
+  "A major mode leveraging `dired-mode' to display a filesystem in a tree
+layout."
+  :group 'files)
+
+(defcustom dired-sidebar/use-custom-font t
+  "Show `dired-sidebar' with font face using `dired-sidebar/font-face'."
+  :type 'boolean
+  :group 'dired-sidebar)
+
+(defvar dired-sidebar/font-face '(:family "Helvetica" :height 130)
+  "Face used by `dired-sidebar' for font if `dired-sidebar/use-custom-font'
+is true.")
+
+(defcustom dired-sidebar/use-custom-modeline t
+  "Show `dired-sidebar' with custom modeline using
+`dired-sidebar/mode-line-format'."
+  :type 'boolean
+  :group 'dired-sidebar)
+
+(defvar dired-sidebar/mode-line-format
+  '("%e" mode-line-front-space
+    mode-line-buffer-identification
+    "  " (vc-mode vc-mode) "  "  mode-line-end-spaces)
+  "Mode line format for `dired-sidebar'.")
+
+;; Mode
+
 (defmacro dired-sidebar/with-no-dedication (&rest body)
   "Run BODY after undedicating window."
   `(progn
@@ -94,34 +124,6 @@
   (dired-sidebar/set-font)
   (dired-sidebar/set-mode-line)
   (dired-unadvertise (dired-current-directory)))
-
-;; Customizations
-
-(defgroup dired-sidebar nil
-  "A major mode leveraging `dired-mode' to display a filesystem in a tree
-layout."
-  :group 'files)
-
-(defcustom dired-sidebar/use-custom-font t
-  "Show `dired-sidebar' with font face using `dired-sidebar/font-face'."
-  :type 'boolean
-  :group 'dired-sidebar)
-
-(defvar dired-sidebar/font-face '(:family "Helvetica" :height 130)
-  "Face used by `dired-sidebar' for font if `dired-sidebar/use-custom-font'
-is true.")
-
-(defcustom dired-sidebar/use-custom-modeline t
-  "Show `dired-sidebar' with custom modeline using
-`dired-sidebar/mode-line-format'."
-  :type 'boolean
-  :group 'dired-sidebar)
-
-(defvar dired-sidebar/mode-line-format
-  '("%e" mode-line-front-space
-    mode-line-buffer-identification
-    "  " (vc-mode vc-mode) "  "  mode-line-end-spaces)
-  "Mode line format for `dired-sidebar'.")
 
 ;; User Interface
 
