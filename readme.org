@@ -1,0 +1,35 @@
+* Install
+  #+begin_src emacs-lisp :tangle yes
+(use-package dired-subtree
+  :ensure t
+  :commands (dired-subtree-toggle dired-subtree-cycle)
+  :config
+  (setq dired-subtree-use-backgrounds nil))
+
+(use-package dired-sidebar
+  :bind (("C-x C-n" . dired-sidebar/toggle-sidebar))
+  :ensure nil
+  :commands (dired-sidebar/toggle-sidebar)
+  :config
+  (use-package all-the-icons-dired
+    ;; M-x all-the-icons-install-fonts
+    :ensure t
+    :commands (all-the-icons-dired-mode)))
+  #+end_src
+
+* Screenshots
+  #+CAPTION: Basic Look
+  #+NAME: Basic
+  [[./screenshots/basic.png]]
+
+  #+CAPTION: Running dired at the same time
+  #+NAME: Runing Dired
+  [[./screenshots/run_dired.png]]
+
+  #+CAPTION: With dired-subtree
+  #+NAME: With Dired Subtree
+  [[./screenshots/with_dired_subtree.png]]
+
+  #+CAPTION: Works with multiple frames
+  #+NAME: Multiple Frames
+  [[./screenshots/multi_frames.png]]
