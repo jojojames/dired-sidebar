@@ -1,5 +1,9 @@
 * Install
   #+begin_src emacs-lisp :tangle yes
+  ;; git clone https://github.com/jojojames/dired-sidebar
+  ;; pwd
+  ;; Put this in the load-path.
+
 (use-package dired-subtree
   :ensure t
   :commands (dired-subtree-toggle dired-subtree-cycle)
@@ -7,6 +11,7 @@
   (setq dired-subtree-use-backgrounds nil))
 
 (use-package dired-sidebar
+  :load-path "What you got from pwd."
   :bind (("C-x C-n" . dired-sidebar/toggle-sidebar))
   :ensure nil
   :commands (dired-sidebar/toggle-sidebar)
