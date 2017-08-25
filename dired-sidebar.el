@@ -104,30 +104,6 @@ is true.")
     "  " (vc-mode vc-mode) "  "  mode-line-end-spaces)
   "Mode line format for `dired-sidebar'.")
 
-;; Helpers
-
-(defun dired-sidebar/sidebar-root ()
-  "Return directory."
-  (condition-case nil
-      (projectile-project-root)
-    (error default-directory)))
-
-(defun dired-sidebar/sidebar-buffer-name (root)
-  "Return name of buffer given ROOT."
-  (abbreviate-file-name root))
-
-(defun dired-sidebar/set-font ()
-  "Set font to a variable width (proportional) fonts in current buffer"
-  (interactive)
-  (when dired-sidebar/use-custom-font
-    (setq buffer-face-mode-face dired-sidebar/font-face)
-    (buffer-face-mode)))
-
-(defun dired-sidebar/set-mode-line ()
-  "Set up modeline."
-  (when dired-sidebar/use-custom-modeline
-    (setq mode-line-format dired-sidebar/mode-line-format)))
-
 ;; User Interface
 
 ;;;###autoload
@@ -163,6 +139,30 @@ the frame and makes it a dedicated window for that buffer."
 (defun dired-sidebar/hide-sidebar (buffer)
   "Hide the sidebar window."
   (delete-window (get-buffer-window buffer)))
+
+;; Helpers
+
+(defun dired-sidebar/sidebar-root ()
+  "Return directory."
+  (condition-case nil
+      (projectile-project-root)
+    (error default-directory)))
+
+(defun dired-sidebar/sidebar-buffer-name (root)
+  "Return name of buffer given ROOT."
+  (abbreviate-file-name root))
+
+(defun dired-sidebar/set-font ()
+  "Set font to a variable width (proportional) fonts in current buffer"
+  (interactive)
+  (when dired-sidebar/use-custom-font
+    (setq buffer-face-mode-face dired-sidebar/font-face)
+    (buffer-face-mode)))
+
+(defun dired-sidebar/set-mode-line ()
+  "Set up modeline."
+  (when dired-sidebar/use-custom-modeline
+    (setq mode-line-format dired-sidebar/mode-line-format)))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
