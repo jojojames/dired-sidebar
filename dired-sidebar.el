@@ -150,7 +150,7 @@ the frame and makes it a dedicated window for that buffer."
 
 (defun dired-sidebar/sidebar-buffer-name (root)
   "Return name of buffer given ROOT."
-  (abbreviate-file-name root))
+  (concat ":" (abbreviate-file-name root)))
 
 (defun dired-sidebar/set-font ()
   "Set font to a variable width (proportional) fonts in current buffer"
