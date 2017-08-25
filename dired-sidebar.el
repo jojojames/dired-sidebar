@@ -143,7 +143,8 @@ is true.")
   (when dired-sidebar/use-custom-modeline
     (dired-sidebar/set-mode-line))
 
-  (dired-unadvertise (dired-current-directory)))
+  (dired-unadvertise (dired-current-directory))
+  (dired-sidebar/update-buffer-name))
 
 ;; User Interface
 
@@ -184,9 +185,13 @@ the frame and makes it a dedicated window for that buffer."
         (dired-file-name (dired-get-file-for-visit)))
     (if (file-directory-p dired-file-name)
         (dired-sidebar/with-no-dedication
-         ;; Copied from `dired-find-file'.
-         (find-file dired-file-name)
-         (dired-sidebar-mode))
+         (let ((buf-name (dired-sidebar/sidebar-buffer-name
+                          dired-file-name)))
+           (if (dired-sidebar/buffer-exists-p buf-name)
+               (switch-to-buffer buf-name)
+             ;; Copied from `dired-find-file'.
+             (find-file dired-file-name)
+             (dired-sidebar-mode))))
       (select-window (if (and ace
                               (fboundp 'aw-select))
                          (aw-select "Select buffer")
@@ -203,10 +208,19 @@ if file was a file and not a directory."
   "Wrapper over `dired-up-directory'."
   (interactive)
   (dired-sidebar/with-no-dedication
-   (dired-up-directory)
-   (dired-sidebar-mode)))
+   (let* ((dir (dired-current-directory))
+          (up (file-name-directory (directory-file-name dir)))
+          (up-name (dired-sidebar/sidebar-buffer-name up)))
+     (if (dired-sidebar/buffer-exists-p up-name)
+         (switch-to-buffer up-name)
+       (dired-up-directory)
+       (dired-sidebar-mode)))))
 
 ;; Helpers
+
+(defun dired-sidebar/buffer-exists-p (buffer-name)
+  "Check if a `dired-sidebar' buffer exists for BUFFER-NAME."
+  (get-buffer buffer-name))
 
 (defun dired-sidebar/sidebar-root ()
   "Return directory."
@@ -216,7 +230,15 @@ if file was a file and not a directory."
 
 (defun dired-sidebar/sidebar-buffer-name (root)
   "Return name of buffer given ROOT."
-  (concat ":" (abbreviate-file-name root)))
+  (let ((b (concat ":" (abbreviate-file-name root))))
+    (cond
+     ((string-suffix-p ".." b)
+      ;; ~/.emacs.d/elpa/.. -> ~/.emacs.d/
+      (file-name-directory (substring b 0 (- (length b) 3))))
+     ((not (string-suffix-p "/" b))
+      (concat b "/"))
+     (:default
+      b))))
 
 (defun dired-sidebar/get-or-create-buffer (&optional dir)
   "Return an existing `dired-sidebar' buffer or create a new one
@@ -254,6 +276,11 @@ Copied from `treemacs--set-width'."
         (shrink-window-horizontally  (- (window-width) w)))
        ((< (window-width) w)
         (enlarge-window-horizontally (- w (window-width))))))))
+
+(defun dired-sidebar/update-buffer-name ()
+  "Change buffer name to avoid collision with regular `dired' buffers."
+  (rename-buffer
+   (dired-sidebar/sidebar-buffer-name (dired-current-directory))))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
