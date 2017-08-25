@@ -80,6 +80,11 @@ is true.")
     "  " (vc-mode vc-mode) "  "  mode-line-end-spaces)
   "Mode line format for `dired-sidebar'.")
 
+(defcustom dired-sidebar/use-all-the-icons t
+  "Use `all-the-icons' if true."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 ;; Mode
 
 (defmacro dired-sidebar/with-no-dedication (&rest body)
@@ -119,10 +124,18 @@ is true.")
   ;; We don't want extra details in the sidebar.
   (dired-hide-details-mode)
 
-  (when (fboundp 'all-the-icons-dired-mode)
+  (when (and
+         dired-sidebar/use-all-the-icons
+         (display-graphic-p)
+         (fboundp 'all-the-icons-dired-mode))
     (all-the-icons-dired-mode))
-  (dired-sidebar/set-font)
-  (dired-sidebar/set-mode-line)
+
+  (when dired-sidebar/use-custom-font
+    (dired-sidebar/set-font))
+
+  (when dired-sidebar/use-custom-modeline
+    (dired-sidebar/set-mode-line))
+
   (dired-unadvertise (dired-current-directory)))
 
 ;; User Interface
@@ -202,14 +215,12 @@ and return that."
 (defun dired-sidebar/set-font ()
   "Set font to a variable width (proportional) fonts in current buffer"
   (interactive)
-  (when dired-sidebar/use-custom-font
-    (setq buffer-face-mode-face dired-sidebar/font-face)
-    (buffer-face-mode)))
+  (setq buffer-face-mode-face dired-sidebar/font-face)
+  (buffer-face-mode))
 
 (defun dired-sidebar/set-mode-line ()
   "Set up modeline."
-  (when dired-sidebar/use-custom-modeline
-    (setq mode-line-format dired-sidebar/mode-line-format)))
+  (setq mode-line-format dired-sidebar/mode-line-format))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
