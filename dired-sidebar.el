@@ -74,7 +74,8 @@
   (when (fboundp 'all-the-icons-dired-mode)
     (all-the-icons-dired-mode))
   (dired-sidebar/set-font)
-  (dired-sidebar/set-mode-line))
+  (dired-sidebar/set-mode-line)
+  (dired-unadvertise (dired-current-directory)))
 
 ;; Customizations
 
@@ -120,11 +121,11 @@ is true.")
         (rename-buffer name)))
     (if (get-buffer-window buffer)
         (dired-sidebar/hide-sidebar buffer)
-      (dired-sidebar/show-sidebar buffer root)
+      (dired-sidebar/show-sidebar buffer)
       (pop-to-buffer buffer))))
 
 ;;;###autoload
-(defun dired-sidebar/show-sidebar (buffer dir)
+(defun dired-sidebar/show-sidebar (buffer)
   "Project dired buffer on the side of the frame.
 Shows the projectile root folder using dired on the left side of
 the frame and makes it a dedicated window for that buffer."
@@ -132,8 +133,7 @@ the frame and makes it a dedicated window for that buffer."
                                           (window-width . 0.2)))
   (set-window-dedicated-p (get-buffer-window buffer) t)
   (with-current-buffer buffer
-    (dired-sidebar-mode)
-    (dired-unadvertise dir)))
+    (dired-sidebar-mode)))
 
 ;;;###autoload
 (defun dired-sidebar/hide-sidebar (buffer)
