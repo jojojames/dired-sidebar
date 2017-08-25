@@ -85,6 +85,11 @@ is true.")
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar/width 35
+  "Width of the `dired-sidebar' buffer."
+  :type 'integer
+  :group 'dired-sidebar)
+
 ;; Mode
 
 (defmacro dired-sidebar/with-no-dedication (&rest body)
@@ -157,9 +162,13 @@ is true.")
   "Project dired buffer on the side of the frame.
 Shows the projectile root folder using dired on the left side of
 the frame and makes it a dedicated window for that buffer."
-  (display-buffer-in-side-window buffer '((side . left)
-                                          (window-width . 0.2)))
-  (set-window-dedicated-p (get-buffer-window buffer) t)
+  (display-buffer-in-side-window buffer '((side . left)))
+  (let ((window (get-buffer-window buffer)))
+    (set-window-dedicated-p window t)
+    (save-mark-and-excursion
+      (select-window window)
+      (let ((window-size-fixed))
+        (dired-sidebar/set-width dired-sidebar/width))))
   (with-current-buffer buffer
     (dired-sidebar-mode)))
 
@@ -232,6 +241,19 @@ and return that."
 (defun dired-sidebar/set-mode-line ()
   "Set up modeline."
   (setq mode-line-format dired-sidebar/mode-line-format))
+
+(defun dired-sidebar/set-width (width)
+  "Set the width of the buffer to WIDTH when it is created.
+
+Copied from `treemacs--set-width'."
+  (unless (one-window-p)
+    (let ((window-size-fixed)
+          (w (max width window-min-width)))
+      (cond
+       ((> (window-width) w)
+        (shrink-window-horizontally  (- (window-width) w)))
+       ((< (window-width) w)
+        (enlarge-window-horizontally (- w (window-width))))))))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
