@@ -96,6 +96,12 @@ is true.")
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar/pop-to-sidebar-on-toggle-open t
+  "Also jump to sidebar when toggling sidebar open with
+`dired-sidebar/toggle-sidebar'."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 ;; Internal
 (defvar dired-sidebar/alist '()
   "An alist that maps from frame to currently opened `dired-sidebar' buffer.")
@@ -171,7 +177,8 @@ is true.")
   (if (dired-sidebar/showing-sidebar-in-frame-p)
       (dired-sidebar/hide-sidebar)
     (dired-sidebar/show-sidebar)
-    (pop-to-buffer (dired-sidebar/sidebar-buffer-in-frame))))
+    (when dired-sidebar/pop-to-sidebar-on-toggle-open
+      (pop-to-buffer (dired-sidebar/sidebar-buffer-in-frame)))))
 
 ;;;###autoload
 (defun dired-sidebar/show-sidebar (&optional b)
