@@ -46,7 +46,9 @@ layout."
   :group 'files)
 
 (defcustom dired-sidebar/use-custom-font t
-  "Show `dired-sidebar' with font face using `dired-sidebar/font-face'."
+  "Show `dired-sidebar' with custom font.
+
+This face can be customized using `dired-sidebar/font-face'."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -58,14 +60,16 @@ layout."
     '(:family "Times New Roman" :height 150))
    (:default
     '(:family "Arial" :height 150)))
-  "Face used by `dired-sidebar' for font if `dired-sidebar/use-custom-font'
-is true."
+  "Face used by `dired-sidebar' for custom font.
+
+This only takes effect if `dired-sidebar/use-custom-font' is true."
   :type 'list
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar/use-custom-modeline t
-  "Show `dired-sidebar' with custom modeline using
-`dired-sidebar/mode-line-format'."
+  "Show `dired-sidebar' with custom modeline.
+
+This uses format specified by `dired-sidebar/mode-line-format'."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -78,7 +82,9 @@ is true."
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar/use-all-the-icons t
-  "Use `all-the-icons' if true. This has no effect in Terminals."
+  "Use `all-the-icons' if true.
+
+This has no effect in Terminals."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -93,25 +99,31 @@ is true."
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar/pop-to-sidebar-on-toggle-open t
-  "If true, jump to sidebar when toggling sidebar open with
-`dired-sidebar/toggle-sidebar'."
+  "Whether to jump to sidebar upon toggling open.
+
+This is used in conjunction with `dired-sidebar/toggle-sidebar'."
   :type 'boolean
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar/use-evil-integration t
-  "Set up some keybindings with `evil-mode' if true.
-This needs to be set before `dired-sidebar-mode' is called for the first time."
+  "Whether to integrate with evil.
+
+This needs to be set before calling command `dired-sidebar-mode'
+for the first time."
   :type 'boolean
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar/cycle-subtree-on-click t
-  "When clicking a directory, cycle `dired' folder if this is true
-and if `dired-subtree' is installed."
+  "Whether to cycle subtree on click.
+
+This only takes effect if `dired-subtree' is installed."
   :type 'boolean
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar/delay-auto-revert-updates t
-  "When true, only allow `auto-revert-mode' updates every
+  "Whether to delay automatically reverting buffer.
+
+When true, only allow function `auto-revert-mode' to update every
 `dird-sidebar/stale-buffer-time-idle-delay' seconds."
   :type 'boolean
   :group 'dired-sidebar)
@@ -127,11 +139,14 @@ and if `dired-subtree' is installed."
   "An alist that maps from frame to currently opened `dired-sidebar' buffer.")
 
 (defvar-local dired-sidebar/stale-buffer-timer nil
-  "Buffer local timer used for setting
-`dired-sidebar/check-for-stale-buffer-p'.")
+  "Timer used for setting `dired-sidebar/check-for-stale-buffer-p'.
+
+This is buffer local.")
 
 (defvar-local dired-sidebar/check-for-stale-buffer-p nil
-  "When this is true `dired-sidebar/buffer-stale-p'
+  "Whether to check if buffer is stale.
+
+When this is true `dired-sidebar/buffer-stale-p'
 will check if buffer is stale through `auto-revert-mode'.")
 
 ;; Mode
@@ -153,7 +168,7 @@ will check if buffer is stale through `auto-revert-mode'.")
     (define-key map (kbd "C-o") 'dired-sidebar/find-file-ace)
     (define-key map [mouse-2] 'dired-sidebar/mouse-subtree-cycle-or-find-file)
     map)
-  "Keymap used for `dired-sidebar-mode'.")
+  "Keymap used for symbol `dired-sidebar-mode'.")
 
 (define-minor-mode dired-sidebar-mode
   "A minor mode that leverages `dired' to emulate a Tree browser."
@@ -230,7 +245,7 @@ will check if buffer is stale through `auto-revert-mode'.")
 
 ;;;###autoload
 (defun dired-sidebar/show-sidebar (&optional b)
-  "Show sidebar using B or use currect project root. in the selected frame."
+  "Show sidebar using B or use currect project root in the selected frame."
   (interactive)
   (let ((buffer (or b (dired-sidebar/get-or-create-buffer))))
     (display-buffer-in-side-window buffer '((side . left)))
@@ -252,7 +267,9 @@ will check if buffer is stale through `auto-revert-mode'.")
     (dired-sidebar/update-state-in-frame nil)))
 
 (defun dired-sidebar/find-file (&optional dir ace)
-  "Wrapper over `dired-find-file'."
+  "Wrapper over `dired-find-file'.
+Optional argument DIR Fine file using DIR of available.
+Optional argument ACE Whether or not to use `ace-window' when opening file."
   (interactive)
   (let ((find-file-run-dired t)
         (dired-file-name (or dir (dired-get-file-for-visit))))
@@ -282,8 +299,7 @@ will check if buffer is stale through `auto-revert-mode'.")
         (find-file dired-file-name)))))
 
 (defun dired-sidebar/find-file-ace ()
-  "Wrapper over `dired-find-file' but open file using `ace-window'
-if file is a file and not a directory."
+  "Like `dired-sidebar/find-file' but open files with `ace-window'."
   (interactive)
   (dired-sidebar/find-file nil :ace))
 
@@ -303,7 +319,7 @@ if file is a file and not a directory."
        (dired-sidebar/update-state-in-frame (current-buffer))))))
 
 (defun dired-sidebar/mouse-subtree-cycle-or-find-file (event)
-  "Handle a mouse click event in `dired-sidebar'.
+  "Handle a mouse click EVENT in `dired-sidebar'.
 
 For directories, if `dired-sidebar/cycle-subtree-on-click' is true and
 `dired-subtree' is installed, cycle the directory.
@@ -359,8 +375,7 @@ the relevant file/directory clicked on by the mouse."
     (concat ":" (abbreviate-file-name b))))
 
 (defun dired-sidebar/get-or-create-buffer (&optional dir)
-  "Return an existing `dired-sidebar' buffer or create a new one
-and return that."
+  "Get or create a `dired-sidebar' buffer matching DIR."
   (interactive)
   (let* ((root (or dir (dired-sidebar/sidebar-root)))
          (name (dired-sidebar/sidebar-buffer-name root))
@@ -373,14 +388,15 @@ and return that."
     buffer))
 
 (defun dired-sidebar/set-font ()
-  "Set font to a variable width (proportional) in the current
-`dired-sidebar' buffer."
+  "Customize font in `dired-sidebar'.
+
+Set font to a variable width (proportional) in the current buffer."
   (interactive)
   (setq buffer-face-mode-face dired-sidebar/font-face)
   (buffer-face-mode))
 
 (defun dired-sidebar/set-mode-line ()
-  "Set up modeline in the current `dired-sidebar' buffer."
+  "Customize modeline in `dired-sidebar'."
   (setq mode-line-format dired-sidebar/mode-line-format))
 
 (defun dired-sidebar/set-width (width)
@@ -402,14 +418,16 @@ Copied from `treemacs--set-width'."
    (dired-sidebar/sidebar-buffer-name (dired-current-directory))))
 
 (defun dired-sidebar/update-state-in-frame (buffer &optional f)
-  "Update current state of sidebar in F or selected frame."
+  "Update current state with BUFFER for sidebar in F or selected frame."
   (let ((frame (or f (selected-frame))))
     (if (assq frame dired-sidebar/alist)
         (setcdr (assq frame dired-sidebar/alist) buffer)
       (push `(,frame . ,buffer) dired-sidebar/alist))))
 
 (defun dired-sidebar/showing-sidebar-in-frame-p (&optional f)
-  "Check if F or selected frame contains a sidebar and return
+  "Whether F or selected frame is showing a sidebar.
+
+Check if F or selected frame contains a sidebar and return
 corresponding buffer if buffer has a window attached to it.
 
 Return buffer if so."
@@ -440,7 +458,9 @@ Return buffer if so."
 
 Check if buffer is stale only if `dired-sidebar/stale-buffer-time-idle-delay'
 
-has elapsed."
+has elapsed.
+
+Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
   (when dired-sidebar/check-for-stale-buffer-p
     (setq dired-sidebar/check-for-stale-buffer-p nil)
     (dired-buffer-stale-p noconfirm)))
