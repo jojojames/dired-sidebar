@@ -125,7 +125,7 @@ This is used in conjunction with `dired-sidebar-toggle-sidebar'."
 This needs to be set before calling command `dired-sidebar-mode'
 for the first time.
 
-If using use-package, set this in :init."
+If using ‘use-package’, set this in :init."
   :type 'boolean
   :group 'dired-sidebar)
 
