@@ -65,9 +65,11 @@ layout."
   :type 'boolean
   :group 'dired-sidebar)
 
-(defvar dired-sidebar/font-face '(:family "Helvetica" :height 130)
+(defcustom dired-sidebar/font-face '(:family "Helvetica" :height 130)
   "Face used by `dired-sidebar' for font if `dired-sidebar/use-custom-font'
-is true.")
+is true."
+  :type 'list
+  :group 'dired-sidebar)
 
 (defcustom dired-sidebar/use-custom-modeline t
   "Show `dired-sidebar' with custom modeline using
@@ -75,14 +77,16 @@ is true.")
   :type 'boolean
   :group 'dired-sidebar)
 
-(defvar dired-sidebar/mode-line-format
+(defcustom dired-sidebar/mode-line-format
   '("%e" mode-line-front-space
     mode-line-buffer-identification
     "  " (vc-mode vc-mode) "  "  mode-line-end-spaces)
-  "Mode line format for `dired-sidebar'.")
+  "Mode line format for `dired-sidebar'."
+  :type 'list
+  :group 'dired-sidebar)
 
 (defcustom dired-sidebar/use-all-the-icons t
-  "Use `all-the-icons' if true."
+  "Use `all-the-icons' if true. This has no effect in Terminals."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -97,7 +101,7 @@ is true.")
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar/pop-to-sidebar-on-toggle-open t
-  "Also jump to sidebar when toggling sidebar open with
+  "If true, jump to sidebar when toggling sidebar open with
 `dired-sidebar/toggle-sidebar'."
   :type 'boolean
   :group 'dired-sidebar)
@@ -190,9 +194,7 @@ This needs to be set before `dired-sidebar-mode' is called for the first time."
 
 ;;;###autoload
 (defun dired-sidebar/show-sidebar (&optional b)
-  "Project dired buffer on the side of the frame.
-Shows the projectile root folder using dired on the left side of
-the frame and makes it a dedicated window for that buffer."
+  "Show sidebar using B or use currect project root. in the selected frame."
   (interactive)
   (let ((buffer (or b (dired-sidebar/get-or-create-buffer))))
     (display-buffer-in-side-window buffer '((side . left)))
@@ -207,7 +209,7 @@ the frame and makes it a dedicated window for that buffer."
 
 ;;;###autoload
 (defun dired-sidebar/hide-sidebar ()
-  "Hide the sidebar window."
+  "Hide the sidebar in the selected frame."
   (interactive)
   (let ((buffer (dired-sidebar/sidebar-buffer-in-frame)))
     (delete-window (get-buffer-window buffer))
@@ -238,7 +240,7 @@ the frame and makes it a dedicated window for that buffer."
 
 (defun dired-sidebar/find-file-ace ()
   "Wrapper over `dired-find-file' but open file using `ace-window'
-if file was a file and not a directory."
+if file is a file and not a directory."
   (interactive)
   (dired-sidebar/find-file :ace))
 
@@ -264,14 +266,14 @@ if file was a file and not a directory."
   (get-buffer buffer-name))
 
 (defun dired-sidebar/sidebar-root ()
-  "Return directory."
+  "Return directory using `projectile' or current directory otherwise."
   (condition-case nil
       (projectile-project-root)
     (error default-directory)))
 
-(defun dired-sidebar/sidebar-buffer-name (root)
-  "Return name of buffer given ROOT."
-  (let ((b (concat ":" (abbreviate-file-name root))))
+(defun dired-sidebar/sidebar-buffer-name (dir)
+  "Return name of `dired-sidebar' buffer given DIR."
+  (let ((b (concat ":" (abbreviate-file-name dir))))
     (cond
      ((string-suffix-p ".." b)
       ;; ~/.emacs.d/elpa/.. -> ~/.emacs.d/
@@ -296,13 +298,14 @@ and return that."
     buffer))
 
 (defun dired-sidebar/set-font ()
-  "Set font to a variable width (proportional) fonts in current buffer"
+  "Set font to a variable width (proportional) in the current
+`dired-sidebar' buffer."
   (interactive)
   (setq buffer-face-mode-face dired-sidebar/font-face)
   (buffer-face-mode))
 
 (defun dired-sidebar/set-mode-line ()
-  "Set up modeline."
+  "Set up modeline in the current `dired-sidebar' buffer."
   (setq mode-line-format dired-sidebar/mode-line-format))
 
 (defun dired-sidebar/set-width (width)
@@ -342,7 +345,7 @@ Return buffer if so."
     nil))
 
 (defun dired-sidebar/sidebar-buffer-in-frame (&optional f)
-  "Return the current sidebar buffer in f or selected frame."
+  "Return the current sidebar buffer in F or selected frame."
   (let ((frame (or f (selected-frame))))
     (alist-get frame dired-sidebar/alist)))
 
