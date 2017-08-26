@@ -3,7 +3,6 @@
   ;; git clone https://github.com/jojojames/dired-sidebar
   ;; pwd
   ;; Put this in the load-path.
-
 (use-package dired-subtree
   :ensure t
   :commands (dired-subtree-toggle dired-subtree-cycle)
@@ -12,9 +11,9 @@
 
 (use-package dired-sidebar
   :load-path "What you got from pwd."
-  :bind (("C-x C-n" . dired-sidebar/toggle-sidebar))
+  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
   :ensure nil
-  :commands (dired-sidebar/toggle-sidebar)
+  :commands (dired-sidebar-toggle-sidebar)
   :config
   (use-package all-the-icons-dired
     ;; M-x all-the-icons-install-fonts
@@ -23,10 +22,6 @@
   #+end_src
 
 * Screenshots
-  #+CAPTION: Basic Look
-  #+NAME: Basic
-  [[./screenshots/basic.png]]
-
   #+CAPTION: Running dired at the same time
   #+NAME: Runing Dired
   [[./screenshots/run_dired.png]]
