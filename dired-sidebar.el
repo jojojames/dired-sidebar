@@ -65,7 +65,14 @@ layout."
   :type 'boolean
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar/font-face '(:family "Helvetica" :height 130)
+(defcustom dired-sidebar/font-face
+  (cond
+   ((eq system-type 'darwin)
+    '(:family "Helvetica" :height 140))
+   ((eq system-type 'windows-nt)
+    '(:family "Times New Roman" :height 150))
+   (:default
+    '(:family "Arial" :height 150)))
   "Face used by `dired-sidebar' for font if `dired-sidebar/use-custom-font'
 is true."
   :type 'list
