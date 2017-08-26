@@ -51,6 +51,7 @@
 (require 'evil nil t)
 (require 'face-remap)
 (require 'projectile nil t)
+(eval-when-compile (require 'subr-x))
 
 ;; Customizations
 
@@ -89,6 +90,15 @@ is true.")
   "Width of the `dired-sidebar' buffer."
   :type 'integer
   :group 'dired-sidebar)
+
+(defcustom dired-sidebar/refresh-on-projectile-switch t
+  "Refresh sidebar when `projectile' changes projects."
+  :type 'boolean
+  :group 'dired-sidebar)
+
+;; Internal
+(defvar dired-sidebar/alist '()
+  "An alist that maps from frame to currently opened `dired-sidebar' buffer.")
 
 ;; Mode
 
@@ -143,6 +153,12 @@ is true.")
   (when dired-sidebar/use-custom-modeline
     (dired-sidebar/set-mode-line))
 
+  (when dired-sidebar/refresh-on-projectile-switch
+    (add-hook
+     'projectile-after-switch-project-hook
+     (lambda ()
+       (dired-sidebar/switch-to-dir (projectile-project-root)))))
+
   (dired-unadvertise (dired-current-directory))
   (dired-sidebar/update-buffer-name))
 
@@ -152,31 +168,35 @@ is true.")
 (defun dired-sidebar/toggle-sidebar ()
   "Toggle the project explorer window."
   (interactive)
-  (let ((buffer (dired-sidebar/get-or-create-buffer)))
-    (if (get-buffer-window buffer)
-        (dired-sidebar/hide-sidebar buffer)
-      (dired-sidebar/show-sidebar buffer)
-      (pop-to-buffer buffer))))
+  (if (dired-sidebar/showing-sidebar-in-frame-p)
+      (dired-sidebar/hide-sidebar)
+    (dired-sidebar/show-sidebar)
+    (pop-to-buffer (dired-sidebar/sidebar-buffer-in-frame))))
 
 ;;;###autoload
-(defun dired-sidebar/show-sidebar (buffer)
+(defun dired-sidebar/show-sidebar (&optional b)
   "Project dired buffer on the side of the frame.
 Shows the projectile root folder using dired on the left side of
 the frame and makes it a dedicated window for that buffer."
-  (display-buffer-in-side-window buffer '((side . left)))
-  (let ((window (get-buffer-window buffer)))
-    (set-window-dedicated-p window t)
-    (save-mark-and-excursion
-      (select-window window)
-      (let ((window-size-fixed))
-        (dired-sidebar/set-width dired-sidebar/width))))
-  (with-current-buffer buffer
-    (dired-sidebar-mode)))
+  (interactive)
+  (let ((buffer (or b (dired-sidebar/get-or-create-buffer))))
+    (display-buffer-in-side-window buffer '((side . left)))
+    (let ((window (get-buffer-window buffer)))
+      (set-window-dedicated-p window t)
+      (with-selected-window window
+        (let ((window-size-fixed))
+          (dired-sidebar/set-width dired-sidebar/width))))
+    (with-current-buffer buffer
+      (dired-sidebar-mode))
+    (dired-sidebar/update-state-in-frame buffer)))
 
 ;;;###autoload
-(defun dired-sidebar/hide-sidebar (buffer)
+(defun dired-sidebar/hide-sidebar ()
   "Hide the sidebar window."
-  (delete-window (get-buffer-window buffer)))
+  (interactive)
+  (let ((buffer (dired-sidebar/sidebar-buffer-in-frame)))
+    (delete-window (get-buffer-window buffer))
+    (dired-sidebar/update-state-in-frame nil)))
 
 (defun dired-sidebar/find-file (&optional ace)
   "Wrapper over `dired-find-file'."
@@ -188,10 +208,13 @@ the frame and makes it a dedicated window for that buffer."
          (let ((buf-name (dired-sidebar/sidebar-buffer-name
                           dired-file-name)))
            (if (dired-sidebar/buffer-exists-p buf-name)
-               (switch-to-buffer buf-name)
+               (progn
+                 (switch-to-buffer buf-name)
+                 (dired-sidebar/update-state-in-frame (current-buffer)))
              ;; Copied from `dired-find-file'.
              (find-file dired-file-name)
-             (dired-sidebar-mode))))
+             (dired-sidebar-mode)
+             (dired-sidebar/update-state-in-frame (current-buffer)))))
       (select-window (if (and ace
                               (fboundp 'aw-select))
                          (aw-select "Select buffer")
@@ -212,9 +235,12 @@ if file was a file and not a directory."
           (up (file-name-directory (directory-file-name dir)))
           (up-name (dired-sidebar/sidebar-buffer-name up)))
      (if (dired-sidebar/buffer-exists-p up-name)
-         (switch-to-buffer up-name)
+         (progn
+           (switch-to-buffer up-name)
+           (dired-sidebar/update-state-in-frame (current-buffer)))
        (dired-up-directory)
-       (dired-sidebar-mode)))))
+       (dired-sidebar-mode)
+       (dired-sidebar/update-state-in-frame (current-buffer))))))
 
 ;; Helpers
 
@@ -281,6 +307,35 @@ Copied from `treemacs--set-width'."
   "Change buffer name to avoid collision with regular `dired' buffers."
   (rename-buffer
    (dired-sidebar/sidebar-buffer-name (dired-current-directory))))
+
+(defun dired-sidebar/update-state-in-frame (buffer &optional f)
+  "Update current state of sidebar in F or selected frame."
+  (let ((frame (or f (selected-frame))))
+    (if (assq frame dired-sidebar/alist)
+        (setcdr (assq frame dired-sidebar/alist) buffer)
+      (push `(,frame . ,buffer) dired-sidebar/alist))))
+
+(defun dired-sidebar/showing-sidebar-in-frame-p (&optional f)
+  "Check if F or selected frame contains a sidebar and return
+corresponding buffer if buffer has a window attached to it.
+
+Return buffer if so."
+  (if-let (buffer (alist-get (or f (selected-frame)) dired-sidebar/alist))
+      (if (get-buffer-window buffer)
+          buffer
+        nil)
+    nil))
+
+(defun dired-sidebar/sidebar-buffer-in-frame (&optional f)
+  "Return the current sidebar buffer in f or selected frame."
+  (let ((frame (or f (selected-frame))))
+    (alist-get frame dired-sidebar/alist)))
+
+(defun dired-sidebar/switch-to-dir (dir)
+  "Update buffer with DIR as root."
+  (when (dired-sidebar/showing-sidebar-in-frame-p)
+    (let ((buffer (dired-sidebar/get-or-create-buffer dir)))
+      (dired-sidebar/show-sidebar buffer))))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
