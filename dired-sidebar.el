@@ -123,7 +123,9 @@ This is used in conjunction with `dired-sidebar-toggle-sidebar'."
   "Whether to integrate with evil.
 
 This needs to be set before calling command `dired-sidebar-mode'
-for the first time."
+for the first time.
+
+If using use-package, set this in :init."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -182,6 +184,21 @@ will check if buffer is stale through `auto-revert-mode'.")
     (define-key map "^" 'dired-sidebar-up-directory)
     (define-key map (kbd "C-o") 'dired-sidebar-find-file-ace)
     (define-key map [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file)
+
+    ;; Not sure why this doesn't load the bindings if it's
+    ;; set up in the minor mode.
+    (when dired-sidebar-use-evil-integration
+      (with-eval-after-load 'evil
+        (when (fboundp 'dired-subtree-toggle)
+          (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
+            [tab] 'dired-subtree-toggle))
+        (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
+          (kbd "C-m") 'dired-sidebar-find-file
+          (kbd "RET") 'dired-sidebar-find-file
+          (kbd "<return>") 'dired-sidebar-find-file
+          "^" 'dired-sidebar-up-directory
+          (kbd "C-o") 'dired-sidebar-find-file-ace
+          [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file)))
     map)
   "Keymap used for symbol `dired-sidebar-mode'.")
 
@@ -213,19 +230,6 @@ will check if buffer is stale through `auto-revert-mode'.")
                   (when (timerp dired-sidebar-stale-buffer-timer)
                     (cancel-timer dired-sidebar-stale-buffer-timer)))
                 nil t)))
-
-  (when dired-sidebar-use-evil-integration
-    (with-eval-after-load 'evil
-      (when (fboundp 'dired-subtree-toggle)
-        (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
-          [tab] 'dired-subtree-toggle))
-      (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
-        (kbd "C-m") 'dired-sidebar-find-file
-        (kbd "RET") 'dired-sidebar-find-file
-        (kbd "<return>") 'dired-sidebar-find-file
-        "^" 'dired-sidebar-up-directory
-        (kbd "C-o") 'dired-sidebar-find-file-ace
-        [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file)))
 
   (when (and
          dired-sidebar-use-all-the-icons
