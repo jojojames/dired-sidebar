@@ -32,10 +32,8 @@
 
 ;;; Code:
 (require 'dired)
-(require 'dired-subtree)
 (require 'evil nil t)
 (require 'face-remap)
-(require 'projectile nil t)
 (eval-when-compile (require 'subr-x))
 
 ;; Customizations
@@ -160,7 +158,8 @@ will check if buffer is stale through `auto-revert-mode'.")
 
 (defvar dired-sidebar-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [tab] 'dired-subtree-toggle)
+    (when (fboundp 'dired-subtree-toggle)
+      (define-key map [tab] 'dired-subtree-toggle))
     (define-key map (kbd "C-m") 'dired-sidebar/find-file)
     (define-key map (kbd "RET") 'dired-sidebar/find-file)
     (define-key map (kbd "<return>") 'dired-sidebar/find-file)
@@ -201,8 +200,10 @@ will check if buffer is stale through `auto-revert-mode'.")
 
   (when dired-sidebar/use-evil-integration
     (with-eval-after-load 'evil
+      (when (fboundp 'dired-subtree-toggle)
+        (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
+          [tab] 'dired-subtree-toggle))
       (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
-        [tab] 'dired-subtree-toggle
         (kbd "C-m") 'dired-sidebar/find-file
         (kbd "RET") 'dired-sidebar/find-file
         (kbd "<return>") 'dired-sidebar/find-file
@@ -226,7 +227,8 @@ will check if buffer is stale through `auto-revert-mode'.")
     (add-hook
      'projectile-after-switch-project-hook
      (lambda ()
-       (dired-sidebar/switch-to-dir (projectile-project-root)))))
+       (when (fboundp 'projectile-project-root)
+         (dired-sidebar/switch-to-dir (projectile-project-root))))))
 
   (dired-unadvertise (dired-current-directory))
   (dired-sidebar/update-buffer-name))
@@ -359,7 +361,9 @@ the relevant file/directory clicked on by the mouse."
 (defun dired-sidebar/sidebar-root ()
   "Return directory using `projectile' or current directory otherwise."
   (condition-case nil
-      (projectile-project-root)
+      (if (fboundp 'projectile-project-root)
+          (projectile-project-root)
+        default-directory)
     (error default-directory)))
 
 (defun dired-sidebar/sidebar-buffer-name (dir)
