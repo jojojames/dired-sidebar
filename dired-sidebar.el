@@ -119,6 +119,12 @@ This needs to be set before `dired-sidebar-mode' is called for the first time."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar/cycle-subtree-on-click t
+  "When clicking a directory, cycle `dired' folder if this is true
+and if `dired-subtree' is installed."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 ;; Internal
 (defvar dired-sidebar/alist '()
   "An alist that maps from frame to currently opened `dired-sidebar' buffer.")
@@ -140,6 +146,7 @@ This needs to be set before `dired-sidebar-mode' is called for the first time."
     (define-key map (kbd "<return>") 'dired-sidebar/find-file)
     (define-key map "^" 'dired-sidebar/up-directory)
     (define-key map (kbd "C-o") 'dired-sidebar/find-file-ace)
+    (define-key map [mouse-2] 'dired-sidebar/mouse-subtree-cycle-or-find-file)
     map)
   "Keymap used for `dired-sidebar-mode'.")
 
@@ -164,7 +171,8 @@ This needs to be set before `dired-sidebar-mode' is called for the first time."
         (kbd "RET") 'dired-sidebar/find-file
         (kbd "<return>") 'dired-sidebar/find-file
         "^" 'dired-sidebar/up-directory
-        (kbd "C-o") 'dired-sidebar/find-file-ace)))
+        (kbd "C-o") 'dired-sidebar/find-file-ace
+        [mouse-2] 'dired-sidebar/mouse-subtree-cycle-or-find-file)))
 
   (when (and
          dired-sidebar/use-all-the-icons
@@ -222,11 +230,11 @@ This needs to be set before `dired-sidebar-mode' is called for the first time."
     (delete-window (get-buffer-window buffer))
     (dired-sidebar/update-state-in-frame nil)))
 
-(defun dired-sidebar/find-file (&optional ace)
+(defun dired-sidebar/find-file (&optional dir ace)
   "Wrapper over `dired-find-file'."
   (interactive)
   (let ((find-file-run-dired t)
-        (dired-file-name (dired-get-file-for-visit)))
+        (dired-file-name (or dir (dired-get-file-for-visit))))
     (if (file-directory-p dired-file-name)
         (dired-sidebar/with-no-dedication
          (let ((buf-name (dired-sidebar/sidebar-buffer-name
@@ -239,17 +247,24 @@ This needs to be set before `dired-sidebar-mode' is called for the first time."
              (find-file dired-file-name)
              (dired-sidebar-mode)
              (dired-sidebar/update-state-in-frame (current-buffer)))))
-      (select-window (if (and ace
-                              (fboundp 'aw-select))
-                         (aw-select "Select buffer")
-                       (next-window)))
-      (find-file dired-file-name))))
+      ;; Select the sidebar window so that `next-window' is consistent
+      ;; in picking the window next to the sidebar.
+      ;; This is useful for when `dired-sidebar/find-file' is called
+      ;; from a buffer that is not already in the sidebar buffer.
+      ;; e.g. A mouse click event.
+      (with-selected-window (get-buffer-window
+                             (dired-sidebar/sidebar-buffer-in-frame))
+        (select-window (if (and ace
+                                (fboundp 'aw-select))
+                           (aw-select "Select buffer")
+                         (next-window)))
+        (find-file dired-file-name)))))
 
 (defun dired-sidebar/find-file-ace ()
   "Wrapper over `dired-find-file' but open file using `ace-window'
 if file is a file and not a directory."
   (interactive)
-  (dired-sidebar/find-file :ace))
+  (dired-sidebar/find-file nil :ace))
 
 (defun dired-sidebar/up-directory ()
   "Wrapper over `dired-up-directory'."
@@ -266,6 +281,38 @@ if file is a file and not a directory."
        (dired-sidebar-mode)
        (dired-sidebar/update-state-in-frame (current-buffer))))))
 
+(defun dired-sidebar/mouse-subtree-cycle-or-find-file (event)
+  "Handle a mouse click event in `dired-sidebar'.
+
+For directories, if `dired-sidebar/cycle-subtree-on-click' is true and
+`dired-subtree' is installed, cycle the directory.
+
+Otherwise, behaves the same as if user clicked on a file.
+
+For files, use `dired-sidebar/find-file'.
+
+This uses the same code as `dired-mouse-find-file-other-window' to find
+the relevant file/directory clicked on by the mouse."
+  (interactive "e")
+  (let (window pos file)
+    (save-excursion
+      (setq window (posn-window (event-end event))
+            pos (posn-point (event-end event)))
+      (if (not (windowp window))
+          (error "No file chosen"))
+      (set-buffer (window-buffer window))
+      (goto-char pos)
+      (setq file (dired-get-file-for-visit)))
+    ;; There's a flicker doing this but it doesn't seem like
+    ;; `dired-subtree-cycle' works without first selecting the window.
+    (with-selected-window window
+      (if (and dired-sidebar/cycle-subtree-on-click
+               (fboundp 'dired-subtree-cycle)
+               (file-directory-p file)
+               (not (string-suffix-p "." file)))
+          (dired-subtree-cycle)
+        (dired-sidebar/find-file file)))))
+
 ;; Helpers
 
 (defun dired-sidebar/buffer-exists-p (buffer-name)
@@ -280,15 +327,15 @@ if file is a file and not a directory."
 
 (defun dired-sidebar/sidebar-buffer-name (dir)
   "Return name of `dired-sidebar' buffer given DIR."
-  (let ((b (concat ":" (abbreviate-file-name dir))))
-    (cond
-     ((string-suffix-p ".." b)
-      ;; ~/.emacs.d/elpa/.. -> ~/.emacs.d/
-      (file-name-directory (substring b 0 (- (length b) 3))))
-     ((not (string-suffix-p "/" b))
-      (concat b "/"))
-     (:default
-      b))))
+  (let ((b (cond
+            ((string-suffix-p ".." dir)
+             ;; ~/.emacs.d/elpa/.. -> ~/.emacs.d/
+             (file-name-directory (substring dir 0 (- (length dir) 3))))
+            ((not (string-suffix-p "/" dir))
+             (concat dir "/"))
+            (:default
+             dir))))
+    (concat ":" (abbreviate-file-name b))))
 
 (defun dired-sidebar/get-or-create-buffer (&optional dir)
   "Return an existing `dired-sidebar' buffer or create a new one
