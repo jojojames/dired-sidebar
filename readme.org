@@ -34,7 +34,3 @@
   #+CAPTION: With dired-subtree
   #+NAME: With Dired Subtree
   [[./screenshots/with_dired_subtree.png]]
-
-  #+CAPTION: Works with multiple frames
-  #+NAME: Multiple Frames
-  [[./screenshots/multi_frames.png]]
