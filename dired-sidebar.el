@@ -125,9 +125,29 @@ and if `dired-subtree' is installed."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar/delay-auto-revert-updates t
+  "When true, only allow `auto-revert-mode' updates every
+`dird-sidebar/stale-buffer-time-idle-delay' seconds."
+  :type 'boolean
+  :group 'dired-sidebar)
+
+(defcustom dired-sidebar/stale-buffer-time-idle-delay 1.5
+  "The time in idle seconds to wait before checking if buffer is stale."
+  :type 'number
+  :group 'dired-sidebar)
+
 ;; Internal
+
 (defvar dired-sidebar/alist '()
   "An alist that maps from frame to currently opened `dired-sidebar' buffer.")
+
+(defvar-local dired-sidebar/stale-buffer-timer nil
+  "Buffer local timer used for setting
+`dired-sidebar/check-for-stale-buffer-p'.")
+
+(defvar-local dired-sidebar/check-for-stale-buffer-p nil
+  "When this is true `dired-sidebar/buffer-stale-p'
+will check if buffer is stale through `auto-revert-mode'.")
 
 ;; Mode
 
@@ -158,10 +178,26 @@ and if `dired-subtree' is installed."
 
   (setq window-size-fixed 'width)
 
-  (auto-revert-mode -1)
-
   ;; We don't want extra details in the sidebar.
   (dired-hide-details-mode)
+
+  (when dired-sidebar/delay-auto-revert-updates
+    (setq-local buffer-stale-function #'dired-sidebar/buffer-stale-p)
+    (let ((current-buffer (current-buffer)))
+      (setq dired-sidebar/stale-buffer-timer
+            (run-with-idle-timer
+             dired-sidebar/stale-buffer-time-idle-delay
+             t (lambda ()
+                 ;; Only do a check if `dired-sidebar' buffer is in the foreground.
+                 (when (get-buffer-window current-buffer)
+                   (with-current-buffer current-buffer
+                     (setq dired-sidebar/check-for-stale-buffer-p t))))))
+
+      (add-hook 'kill-buffer-hook
+                (lambda ()
+                  (when (timerp dired-sidebar/stale-buffer-timer)
+                    (cancel-timer dired-sidebar/stale-buffer-timer)))
+                nil t)))
 
   (when dired-sidebar/use-evil-integration
     (with-eval-after-load 'evil
@@ -398,6 +434,11 @@ Return buffer if so."
         nil)
     nil))
 
+(defun dired-sidebar/showing-sidebar-buffer (buffer)
+  "Check if BUFFER is being shown in sidebar."
+  (when (eq buffer (alist-get (selected-frame) dired-sidebar/alist))
+    (get-buffer-window buffer)))
+
 (defun dired-sidebar/sidebar-buffer-in-frame (&optional f)
   "Return the current sidebar buffer in F or selected frame."
   (let ((frame (or f (selected-frame))))
@@ -408,6 +449,16 @@ Return buffer if so."
   (when (dired-sidebar/showing-sidebar-in-frame-p)
     (let ((buffer (dired-sidebar/get-or-create-buffer dir)))
       (dired-sidebar/show-sidebar buffer))))
+
+(defun dired-sidebar/buffer-stale-p (&optional noconfirm)
+  "Wrapper over `dired-buffer-stale-p'.
+
+Check if buffer is stale only if `dired-sidebar/stale-buffer-time-idle-delay'
+
+has elapsed."
+  (when dired-sidebar/check-for-stale-buffer-p
+    (setq dired-sidebar/check-for-stale-buffer-p nil)
+    (dired-buffer-stale-p noconfirm)))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
