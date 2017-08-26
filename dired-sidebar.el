@@ -102,6 +102,12 @@ is true.")
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar/use-evil-integration t
+  "Set up some keybindings with `evil-mode' if true.
+This needs to be set before `dired-sidebar-mode' is called for the first time."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 ;; Internal
 (defvar dired-sidebar/alist '()
   "An alist that maps from frame to currently opened `dired-sidebar' buffer.")
@@ -123,14 +129,6 @@ is true.")
     (define-key map (kbd "<return>") 'dired-sidebar/find-file)
     (define-key map "^" 'dired-sidebar/up-directory)
     (define-key map (kbd "C-o") 'dired-sidebar/find-file-ace)
-    (with-eval-after-load 'evil
-      (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
-        [tab] 'dired-subtree-toggle
-        (kbd "C-m") 'dired-sidebar/find-file
-        (kbd "RET") 'dired-sidebar/find-file
-        (kbd "<return>") 'dired-sidebar/find-file
-        "^" 'dired-sidebar/up-directory
-        (kbd "C-o") 'dired-sidebar/find-file-ace))
     map)
   "Keymap used for `dired-sidebar-mode'.")
 
@@ -146,6 +144,16 @@ is true.")
 
   ;; We don't want extra details in the sidebar.
   (dired-hide-details-mode)
+
+  (when dired-sidebar/use-evil-integration
+    (with-eval-after-load 'evil
+      (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
+        [tab] 'dired-subtree-toggle
+        (kbd "C-m") 'dired-sidebar/find-file
+        (kbd "RET") 'dired-sidebar/find-file
+        (kbd "<return>") 'dired-sidebar/find-file
+        "^" 'dired-sidebar/up-directory
+        (kbd "C-o") 'dired-sidebar/find-file-ace)))
 
   (when (and
          dired-sidebar/use-all-the-icons
