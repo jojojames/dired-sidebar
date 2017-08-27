@@ -513,9 +513,8 @@ Set font to a variable width (proportional) in the current buffer."
   (setq mode-line-format dired-sidebar-mode-line-format))
 
 (defun dired-sidebar-set-width (width)
-  "Set the width of the buffer to WIDTH when it is created.
-
-Copied from `treemacs--set-width'."
+  "Set the width of the buffer to WIDTH when it is created."
+  ;; Copied from `treemacs--set-width'.
   (unless (one-window-p)
     (let ((window-size-fixed)
           (w (max width window-min-width)))
