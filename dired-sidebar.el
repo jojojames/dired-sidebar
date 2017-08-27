@@ -324,7 +324,7 @@ This is dependent on `dired-subtree-cycle'."
                (path root)
                ;; Imagine root is /root/var/ and name is
                ;; /root/var/a/b/c.
-               ;; This will get return a list of '\("a" "b" "c"\).
+               ;; This will return a list of '\("a" "b" "c"\).
                (dirs (split-string (cadr (split-string name root)) "/")))
           (dolist (dir dirs)
             (setq path (concat path dir))
