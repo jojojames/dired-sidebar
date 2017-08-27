@@ -415,8 +415,9 @@ window selection."
         (find-file dired-file-name)))))
 
 (defun dired-sidebar-find-file-alt ()
-  "Like `dired-sidebar-find-file' but open files using
-`dired-sidebar-alternate-select-window-function'."
+  "Like `dired-sidebar-find-file' but select window with alterate method.
+
+Select alternate window using `dired-sidebar-alternate-select-window-function'."
   (interactive)
   (let ((current-prefix-arg '(4))) ; C-u
     (call-interactively 'dired-sidebar-find-file)))
