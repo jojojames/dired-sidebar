@@ -265,11 +265,8 @@ will check if buffer is stale through `auto-revert-mode'.")
     (dired-sidebar-set-mode-line))
 
   (when dired-sidebar-refresh-on-projectile-switch
-    (add-hook
-     'projectile-after-switch-project-hook
-     (lambda ()
-       (when (fboundp 'projectile-project-root)
-         (dired-sidebar-switch-to-dir (projectile-project-root))))))
+    (add-hook 'projectile-after-switch-project-hook
+              #'dired-sidebar-handle-projectile-switch-project))
 
   (dired-unadvertise (dired-current-directory))
   (dired-sidebar-update-buffer-name))
@@ -513,6 +510,11 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 (defun dired-sidebar-schedule-refresh (&rest _)
   "Schedule sidebar to refresh when ready."
   (setq dired-sidebar-check-for-stale-buffer-p t))
+
+(defun dired-sidebar-handle-projectile-switch-project ()
+  "Handle `projectile-after-switch-project-hook'."
+  (when (fboundp 'projectile-project-root)
+    (dired-sidebar-switch-to-dir (projectile-project-root))))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
