@@ -274,14 +274,21 @@ will check if buffer is stale through `auto-revert-mode'.")
 ;; User Interface
 
 ;;;###autoload
-(defun dired-sidebar-toggle-sidebar ()
+(defun dired-sidebar-toggle-sidebar (&optional dir)
   "Toggle the project explorer window."
   (interactive)
   (if (dired-sidebar-showing-sidebar-in-frame-p)
       (dired-sidebar-hide-sidebar)
-    (dired-sidebar-show-sidebar)
+    (dired-sidebar-show-sidebar (when dir
+                                  (dired-sidebar-get-or-create-buffer dir)))
     (when dired-sidebar-pop-to-sidebar-on-toggle-open
       (pop-to-buffer (dired-sidebar-sidebar-buffer-in-frame)))))
+
+;;;###autoload
+(defun dired-sidebar-toggle-with-current-directory ()
+  "Like `dired-sidebar-toggle-sidebar' but use current-directory."
+  (interactive)
+  (dired-sidebar-toggle-sidebar default-directory))
 
 ;;;###autoload
 (defun dired-sidebar-show-sidebar (&optional b)
