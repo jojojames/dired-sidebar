@@ -149,6 +149,22 @@ When true, only allow function `auto-revert-mode' to update every
   :type 'number
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-refresh-on-special-commands t
+  "Whether or not to trigger auto-revert after certain functions.
+
+Warning: This is implemented by advising specific dired functions."
+  :type 'boolean
+  :group 'dired-sidebar)
+
+(defcustom dired-sidebar-special-refresh-commands
+  '(dired-do-delete
+    dired-do-rename
+    dired-do-copy
+    dired-do-flagged-delete)
+  "A list of commands that will trigger a refresh of the sidebar."
+  :type 'list
+  :group 'dired-sidebar)
+
 ;; Internal
 
 (defvar dired-sidebar-alist '()
@@ -230,6 +246,11 @@ will check if buffer is stale through `auto-revert-mode'.")
                   (when (timerp dired-sidebar-stale-buffer-timer)
                     (cancel-timer dired-sidebar-stale-buffer-timer)))
                 nil t)))
+
+  (when dired-sidebar-refresh-on-special-commands
+    (mapc (lambda (x)
+            (advice-add x :after #'dired-sidebar-schedule-refresh))
+          dired-sidebar-special-refresh-commands))
 
   (when (and
          dired-sidebar-use-all-the-icons
@@ -488,6 +509,10 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
   (when dired-sidebar-check-for-stale-buffer-p
     (setq dired-sidebar-check-for-stale-buffer-p nil)
     (dired-buffer-stale-p noconfirm)))
+
+(defun dired-sidebar-schedule-refresh (&rest _)
+  "Schedule sidebar to refresh when ready."
+  (setq dired-sidebar-check-for-stale-buffer-p t))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
