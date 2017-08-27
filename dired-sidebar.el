@@ -291,43 +291,48 @@ will check if buffer is stale through `auto-revert-mode'.")
     (dired-sidebar-show-sidebar (when dir
                                   (dired-sidebar-get-or-create-buffer dir)))
     (when dired-sidebar-pop-to-sidebar-on-toggle-open
-      (let ((sidebar (dired-sidebar-sidebar-buffer-in-frame)))
-        (if (and dired-sidebar-follow-file-at-point-on-toggle-open
-                 (fboundp 'dired-subtree-cycle)
-                 ;; Checking for a private method. *shrug*
-                 (fboundp 'dired-subtree--is-expanded-p))
-            (if-let ((name buffer-file-name))
-                (progn
-                  (pop-to-buffer sidebar)
-                  (goto-char 0)
-                  (let* ((root (or dir (dired-sidebar-sidebar-root)))
-                         (path root)
-                         ;; Imagine root is /root/var/ and name is
-                         ;; /root/var/a/b/c.
-                         ;; This will get return a list of '\("a" "b" "c"\).
-                         (dirs (split-string (cadr (split-string name root)) "/")))
-                    (dolist (dir dirs)
-                      (setq path (concat path dir))
-                      (if (file-regular-p path)
-                          ;; Try to use `dired-goto-file' to go to the correct
-                          ;; file. If that fails, just search for the text.
-                          (unless (dired-goto-file path)
-                            ;; It's hard to get this right so just using a
-                            ;; heuristic will get 90% of the way there.
-                            ;; Making sure there's a space in front of the name
-                            ;; skips matches that contains the name as a
-                            ;; substring which is probably good enough...
-                            (re-search-forward (concat "^.*[[:space:]]" dir)))
-                        (progn
-                          (re-search-forward (concat "^.*[[:space:]]" dir))
-                          ;; Check if subtree has already been expanded.
-                          ;; Basically, we're using `dired-subtree-cycle' more
-                          ;; like dired-subtree-expand.
-                          (when (not (dired-subtree--is-expanded-p))
-                            (dired-subtree-cycle))
-                          (setq path (concat path "/")))))))
-              (pop-to-buffer sidebar))
-          (pop-to-buffer sidebar))))))
+      (if (and dired-sidebar-follow-file-at-point-on-toggle-open
+               buffer-file-name)
+          (dired-sidebar-point-at-file buffer-file-name dir)
+        (pop-to-buffer (dired-sidebar-sidebar-buffer-in-frame))))))
+
+(defun dired-sidebar-point-at-file (name &optional parent)
+  (let ((sidebar (dired-sidebar-sidebar-buffer-in-frame)))
+    (pop-to-buffer sidebar)
+    (when (and name
+               (fboundp 'dired-subtree-cycle)
+               ;; Checking for a private method. *shrug*
+               (fboundp 'dired-subtree--is-expanded-p))
+      (progn
+        (pop-to-buffer sidebar)
+        (goto-char 0)
+        (let* ((root (or parent (dired-sidebar-sidebar-root)))
+               (path root)
+               ;; Imagine root is /root/var/ and name is
+               ;; /root/var/a/b/c.
+               ;; This will get return a list of '\("a" "b" "c"\).
+               (dirs (split-string (cadr (split-string name root)) "/")))
+          (dolist (dir dirs)
+            (setq path (concat path dir))
+            (if (file-regular-p path)
+                ;; Try to use `dired-goto-file' to go to the correct
+                ;; file. If that fails, just search for the text.
+                (unless (dired-goto-file path)
+                  ;; It's hard to get this right so just using a
+                  ;; heuristic will get 90% of the way there.
+                  ;; Making sure there's a space in front of the name
+                  ;; skips matches that contains the name as a
+                  ;; substring which is probably good enough...
+                  (re-search-forward (concat "^.*[[:space:]]" dir)))
+              (re-search-forward (concat "^.*[[:space:]]" dir))
+              ;; Check if subtree has already been expanded.
+              ;; Basically, we're using `dired-subtree-cycle' more
+              ;; like dired-subtree-expand.
+              (when (not (dired-subtree--is-expanded-p))
+                ;; This will probably throw an error when trying to expand
+                ;; directories that have been collapsed by `dired-collapse'.
+                (dired-subtree-cycle))
+              (setq path (concat path "/")))))))))
 
 ;;;###autoload
 (defun dired-sidebar-toggle-with-current-directory ()
