@@ -122,7 +122,7 @@ This is used in conjunction with `dired-sidebar-toggle-sidebar'."
 (defcustom dired-sidebar-follow-file-at-point-on-toggle-open t
   "Whether to recursively cycle the subtree and put point on file.
 
-Similar to `dired-jump'. This moves point inside sidebar buffer
+Similar to `dired-jump'.  This moves point inside sidebar buffer
 to where current-buffer-file is \(if it exists\) but does not necessarily
 select the sidebar window.
 
@@ -286,7 +286,8 @@ will check if buffer is stale through `auto-revert-mode'.")
 
 ;;;###autoload
 (defun dired-sidebar-toggle-sidebar (&optional dir)
-  "Toggle the project explorer window."
+  "Toggle the project explorer window.
+Optional argument DIR Use DIR as sidebar root if available."
   (interactive)
   (if (dired-sidebar-showing-sidebar-in-frame-p)
       (dired-sidebar-hide-sidebar)
@@ -302,6 +303,12 @@ will check if buffer is stale through `auto-revert-mode'.")
         (pop-to-buffer (dired-sidebar-sidebar-buffer-in-frame))))))
 
 (defun dired-sidebar-point-at-file (name &optional parent)
+  "Try to point at NAME from sidebar.
+
+Keep `dired' pointed at PARENT or function `dired-sidebar-sidebar-root'
+while cycling directories until NAME is found in PARENT path.
+
+This is dependent on `dired-subtree-cycle'."
   (let ((sidebar (dired-sidebar-sidebar-buffer-in-frame)))
     (pop-to-buffer sidebar)
     (when (and name
