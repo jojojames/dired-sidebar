@@ -505,7 +505,7 @@ the relevant file-directory clicked on by the mouse."
 
 Set font to a variable width (proportional) in the current buffer."
   (interactive)
-  (setq buffer-face-mode-face dired-sidebar-font-face)
+  (setq-local buffer-face-mode-face dired-sidebar-font-face)
   (buffer-face-mode))
 
 (defun dired-sidebar-set-mode-line ()
