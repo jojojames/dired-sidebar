@@ -90,7 +90,7 @@ This uses format specified by `dired-sidebar-mode-line-format'."
 (defcustom dired-sidebar-mode-line-format
   '("%e" mode-line-front-space
     mode-line-buffer-identification
-    "  " (vc-mode vc-mode) "  "  mode-line-end-spaces)
+    " "  mode-line-end-spaces)
   "Mode line format for `dired-sidebar'."
   :type 'list
   :group 'dired-sidebar)
