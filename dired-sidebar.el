@@ -62,11 +62,11 @@ layout."
 (defcustom dired-sidebar-use-custom-font t
   "Show `dired-sidebar' with custom font.
 
-This face can be customized using `dired-sidebar-font-face'."
+This face can be customized using `dired-sidebar-face'."
   :type 'boolean
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-font-face
+(defcustom dired-sidebar-face
   (cond
    ((eq system-type 'darwin)
     '(:family "Helvetica" :height 140))
@@ -505,7 +505,7 @@ the relevant file-directory clicked on by the mouse."
 
 Set font to a variable width (proportional) in the current buffer."
   (interactive)
-  (setq-local buffer-face-mode-face dired-sidebar-font-face)
+  (setq-local buffer-face-mode-face dired-sidebar-face)
   (buffer-face-mode))
 
 (defun dired-sidebar-set-mode-line ()
