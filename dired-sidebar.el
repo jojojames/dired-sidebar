@@ -302,7 +302,9 @@ will check if buffer is stale through `auto-revert-mode'.")
         (let ((window-size-fixed))
           (dired-sidebar-set-width dired-sidebar-width))))
     (with-current-buffer buffer
-      (dired-sidebar-mode))
+      ;; For the case where we've already turned on the mode.
+      (unless (bound-and-true-p dired-sidebar-mode)
+        (dired-sidebar-mode)))
     (dired-sidebar-update-state-in-frame buffer)))
 
 ;;;###autoload
