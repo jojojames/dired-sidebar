@@ -169,6 +169,15 @@ Warning: This is implemented by advising specific dired functions."
   :type 'list
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-alternate-select-window-function
+  #'dired-sidebar-default-alternate-select-window
+  "Function to call when using alternative window selection.
+
+Alternative window selection is used when `dired-sidebar-find-file' is called
+with a prefix arg or when `dired-sidebar-find-file-alt' is called."
+  :type 'function
+  :group 'dired-sidebar)
+
 ;; Internal
 
 (defvar dired-sidebar-alist '()
@@ -202,7 +211,7 @@ will check if buffer is stale through `auto-revert-mode'.")
     (define-key map (kbd "RET") 'dired-sidebar-find-file)
     (define-key map (kbd "<return>") 'dired-sidebar-find-file)
     (define-key map "^" 'dired-sidebar-up-directory)
-    (define-key map (kbd "C-o") 'dired-sidebar-find-file-ace)
+    (define-key map (kbd "C-o") 'dired-sidebar-find-file-alt)
     (define-key map [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file)
 
     ;; Not sure why this doesn't load the bindings if it's
@@ -217,7 +226,7 @@ will check if buffer is stale through `auto-revert-mode'.")
           (kbd "RET") 'dired-sidebar-find-file
           (kbd "<return>") 'dired-sidebar-find-file
           "^" 'dired-sidebar-up-directory
-          (kbd "C-o") 'dired-sidebar-find-file-ace
+          (kbd "C-o") 'dired-sidebar-find-file-alt
           [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file)))
     map)
   "Keymap used for symbol `dired-sidebar-mode'.")
@@ -370,13 +379,16 @@ This is dependent on `dired-subtree-cycle'."
     (delete-window (get-buffer-window buffer))
     (dired-sidebar-update-state-in-frame nil)))
 
-(defun dired-sidebar-find-file (&optional dir ace)
+(defun dired-sidebar-find-file (&optional dir)
   "Wrapper over `dired-find-file'.
 Optional argument DIR Fine file using DIR of available.
-Optional argument ACE Whether or not to use `ace-window' when opening file."
+
+With prefix argument, use `dired-sidebar-alternate-select-window-function' for
+window selection."
   (interactive)
   (let ((find-file-run-dired t)
-        (dired-file-name (or dir (dired-get-file-for-visit))))
+        (dired-file-name (or dir (dired-get-file-for-visit)))
+        (select-with-alt-window-function current-prefix-arg))
     (if (file-directory-p dired-file-name)
         (dired-sidebar-with-no-dedication
          (let ((buf-name (dired-sidebar-sidebar-buffer-name
@@ -396,16 +408,18 @@ Optional argument ACE Whether or not to use `ace-window' when opening file."
       ;; e.g. A mouse click event.
       (with-selected-window (get-buffer-window
                              (dired-sidebar-sidebar-buffer-in-frame))
-        (select-window (if (and ace
-                                (fboundp 'aw-select))
-                           (aw-select "Select buffer")
-                         (next-window)))
+        (select-window
+         (if select-with-alt-window-function
+             (funcall dired-sidebar-alternate-select-window-function)
+           (next-window)))
         (find-file dired-file-name)))))
 
-(defun dired-sidebar-find-file-ace ()
-  "Like `dired-sidebar-find-file' but open files with `ace-window'."
+(defun dired-sidebar-find-file-alt ()
+  "Like `dired-sidebar-find-file' but open files using
+`dired-sidebar-alternate-select-window-function'."
   (interactive)
-  (dired-sidebar-find-file nil :ace))
+  (let ((current-prefix-arg '(4))) ; C-u
+    (call-interactively 'dired-sidebar-find-file)))
 
 (defun dired-sidebar-up-directory ()
   "Wrapper over `dired-up-directory'."
@@ -585,6 +599,12 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
       (with-selected-window (selected-window)
         (dired-sidebar-point-at-file
          buffer-file-name (projectile-project-root))))))
+
+(defun dired-sidebar-default-alternate-select-window ()
+  "Default function for `dired-sidebar-alternate-select-window-function'."
+  (if (fboundp 'aw-select)
+      (aw-select "Select Window")
+    (next-window)))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
