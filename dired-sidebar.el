@@ -122,9 +122,11 @@ This is used in conjunction with `dired-sidebar-toggle-sidebar'."
 (defcustom dired-sidebar-follow-file-at-point-on-toggle-open t
   "Whether to recursively cycle the subtree and put point on file.
 
-Similar to `dired-jump'. This only takes effect if
-`dired-sidebar-pop-to-sidebar-on-toggle-open' is true and
-`dired-subtree' is installed."
+Similar to `dired-jump'. This moves point inside sidebar buffer
+to where current-buffer-file is \(if it exists\) but does not necessarily
+select the sidebar window.
+
+This only takes effect if `dired-subtree' is installed."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -290,10 +292,13 @@ will check if buffer is stale through `auto-revert-mode'.")
       (dired-sidebar-hide-sidebar)
     (dired-sidebar-show-sidebar (when dir
                                   (dired-sidebar-get-or-create-buffer dir)))
-    (when dired-sidebar-pop-to-sidebar-on-toggle-open
-      (if (and dired-sidebar-follow-file-at-point-on-toggle-open
-               buffer-file-name)
-          (dired-sidebar-point-at-file buffer-file-name dir)
+    (if (and dired-sidebar-follow-file-at-point-on-toggle-open
+             buffer-file-name)
+        (if dired-sidebar-pop-to-sidebar-on-toggle-open
+            (dired-sidebar-point-at-file buffer-file-name dir)
+          (with-selected-window (selected-window)
+            (dired-sidebar-point-at-file buffer-file-name dir)))
+      (when dired-sidebar-pop-to-sidebar-on-toggle-open
         (pop-to-buffer (dired-sidebar-sidebar-buffer-in-frame))))))
 
 (defun dired-sidebar-point-at-file (name &optional parent)
@@ -573,7 +578,14 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 (defun dired-sidebar-handle-projectile-switch-project ()
   "Handle `projectile-after-switch-project-hook'."
   (when (fboundp 'projectile-project-root)
-    (dired-sidebar-switch-to-dir (projectile-project-root))))
+    (dired-sidebar-switch-to-dir (projectile-project-root))
+    (when (and dired-sidebar-follow-file-at-point-on-toggle-open
+               buffer-file-name)
+      ;; Wrap in `with-selected-window' because we don't want to pop to
+      ;; the sidebar buffer.
+      (with-selected-window (selected-window)
+        (dired-sidebar-point-at-file
+         buffer-file-name (projectile-project-root))))))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
