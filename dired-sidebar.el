@@ -59,21 +59,14 @@
 layout."
   :group 'files)
 
-(defcustom dired-sidebar-use-custom-font t
+(defcustom dired-sidebar-use-custom-font nil
   "Show `dired-sidebar' with custom font.
 
 This face can be customized using `dired-sidebar-face'."
   :type 'boolean
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-face
-  (cond
-   ((eq system-type 'darwin)
-    '(:family "Helvetica" :height 140))
-   ((eq system-type 'windows-nt)
-    '(:family "Times New Roman" :height 150))
-   (:default
-    '(:family "Arial" :height 150)))
+(defcustom dired-sidebar-face nil
   "Face used by `dired-sidebar' for custom font.
 
 This only takes effect if `dired-sidebar-use-custom-font' is true."
