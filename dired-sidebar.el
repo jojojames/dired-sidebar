@@ -599,14 +599,15 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 (defun dired-sidebar-handle-projectile-switch-project ()
   "Handle `projectile-after-switch-project-hook'."
   (when (fboundp 'projectile-project-root)
-    (dired-sidebar-switch-to-dir (projectile-project-root))
-    (when (and dired-sidebar-follow-file-at-point-on-toggle-open
-               buffer-file-name)
-      ;; Wrap in `with-selected-window' because we don't want to pop to
-      ;; the sidebar buffer.
-      (with-selected-window (selected-window)
-        (dired-sidebar-point-at-file
-         buffer-file-name (projectile-project-root))))))
+    (let ((root (projectile-project-root)))
+      (dired-sidebar-switch-to-dir root)
+      (when (and dired-sidebar-follow-file-at-point-on-toggle-open
+                 buffer-file-name)
+        ;; Wrap in `with-selected-window' because we don't want to pop to
+        ;; the sidebar buffer.
+        (with-selected-window (selected-window)
+          (dired-sidebar-point-at-file
+           buffer-file-name root))))))
 
 (defun dired-sidebar-default-alternate-select-window ()
   "Default function for `dired-sidebar-alternate-select-window-function'."
