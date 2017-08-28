@@ -569,11 +569,6 @@ Return buffer if so."
         nil)
     nil))
 
-(defun dired-sidebar-showing-sidebar-buffer (buffer)
-  "Check if BUFFER is being shown in sidebar."
-  (when (eq buffer (alist-get (selected-frame) dired-sidebar-alist))
-    (get-buffer-window buffer)))
-
 (defun dired-sidebar-sidebar-buffer-in-frame (&optional f)
   "Return the current sidebar buffer in F or selected frame."
   (let ((frame (or f (selected-frame))))
