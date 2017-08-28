@@ -199,9 +199,10 @@ will check if buffer is stale through `auto-revert-mode'.")
 (defmacro dired-sidebar-with-no-dedication (&rest body)
   "Run BODY after undedicating window."
   `(progn
-     (set-window-dedicated-p (get-buffer-window (current-buffer)) nil)
-     ,@body
-     (set-window-dedicated-p (get-buffer-window (current-buffer)) t)))
+     (let ((window (get-buffer-window (current-buffer))))
+       (set-window-dedicated-p window nil)
+       ,@body
+       (set-window-dedicated-p window t))))
 
 (defvar dired-sidebar-mode-map
   (let ((map (make-sparse-keymap)))
