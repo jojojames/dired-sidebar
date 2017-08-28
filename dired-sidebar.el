@@ -407,13 +407,12 @@ window selection."
       ;; This is useful for when `dired-sidebar-find-file' is called
       ;; from a buffer that is not already in the sidebar buffer.
       ;; e.g. A mouse click event.
-      (with-selected-window (get-buffer-window
-                             (dired-sidebar-sidebar-buffer-in-frame))
-        (select-window
-         (if select-with-alt-window-function
-             (funcall dired-sidebar-alternate-select-window-function)
-           (next-window)))
-        (find-file dired-file-name)))))
+      (switch-to-buffer (dired-sidebar-sidebar-buffer-in-frame))
+      (select-window
+       (if select-with-alt-window-function
+           (funcall dired-sidebar-alternate-select-window-function)
+         (next-window)))
+      (find-file dired-file-name))))
 
 (defun dired-sidebar-find-file-alt ()
   "Like `dired-sidebar-find-file' but select window with alterate method.
