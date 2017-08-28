@@ -534,7 +534,7 @@ Set font to a variable width (proportional) in the current buffer."
 
 (defun dired-sidebar-set-width (width)
   "Set the width of the buffer to WIDTH when it is created."
-  ;; Copied from `treemacs--set-width'.
+  ;; Copied from `treemacs--set-width' as well as `neotree'.
   (unless (one-window-p)
     (let ((window-size-fixed)
           (w (max width window-min-width)))
