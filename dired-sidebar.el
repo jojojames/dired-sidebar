@@ -334,13 +334,14 @@ This is dependent on `dired-subtree-cycle'."
             (if (file-regular-p path)
                 ;; Try to use `dired-goto-file' to go to the correct
                 ;; file. If that fails, just search for the text.
-                (unless (dired-goto-file path)
-                  ;; It's hard to get this right so just using a
-                  ;; heuristic will get 90% of the way there.
-                  ;; Making sure there's a space in front of the name
-                  ;; skips matches that contains the name as a
-                  ;; substring which is probably good enough...
-                  (re-search-forward (concat "^.*[[:space:]]" dir)))
+                (let ((default-directory (file-name-directory path)))
+                  (unless (dired-goto-file path)
+                    ;; It's hard to get this right so just using a
+                    ;; heuristic will get 90% of the way there.
+                    ;; Making sure there's a space in front of the name
+                    ;; skips matches that contains the name as a
+                    ;; substring which is probably good enough...
+                    (re-search-forward (concat "^.*[[:space:]]" dir))))
               (re-search-forward (concat "^.*[[:space:]]" dir))
               ;; Check if subtree has already been expanded.
               ;; Basically, we're using `dired-subtree-cycle' more
