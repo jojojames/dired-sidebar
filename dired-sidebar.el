@@ -164,7 +164,8 @@ Warning: This is implemented by advising specific dired functions."
   '(dired-do-delete
     dired-do-rename
     dired-do-copy
-    dired-do-flagged-delete)
+    dired-do-flagged-delete
+    dired-create-directory)
   "A list of commands that will trigger a refresh of the sidebar."
   :type 'list
   :group 'dired-sidebar)
