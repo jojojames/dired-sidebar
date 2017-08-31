@@ -428,6 +428,10 @@ Select alternate window using `dired-sidebar-alternate-select-window-function'."
   "Wrapper over `dired-up-directory'."
   (interactive)
   (dired-sidebar-with-no-dedication
+   ;; If `dired-subtree' is used, `dired-current-directory' is redefined.
+   ;; So move point to the top of the buffer to get the actual directory and
+   ;; not the one at point.
+   (goto-char (point-min))
    (let* ((dir (dired-current-directory))
           (up (file-name-directory (directory-file-name dir)))
           (up-name (dired-sidebar-sidebar-buffer-name up)))
@@ -437,7 +441,9 @@ Select alternate window using `dired-sidebar-alternate-select-window-function'."
            (dired-sidebar-update-state-in-frame (current-buffer)))
        (dired-up-directory)
        (dired-sidebar-mode)
-       (dired-sidebar-update-state-in-frame (current-buffer))))))
+       (dired-sidebar-update-state-in-frame (current-buffer)))
+     (let ((default-directory up))
+       (dired-goto-file dir)))))
 
 (defun dired-sidebar-mouse-subtree-cycle-or-find-file (event)
   "Handle a mouse click EVENT in `dired-sidebar'.
