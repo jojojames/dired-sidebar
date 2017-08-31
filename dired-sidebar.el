@@ -607,7 +607,8 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 
 (defun dired-sidebar-handle-projectile-switch-project ()
   "Handle `projectile-after-switch-project-hook'."
-  (when (fboundp 'projectile-project-root)
+  (when (and (fboundp 'projectile-project-root)
+             (dired-sidebar-showing-sidebar-in-frame-p))
     (let ((root (projectile-project-root)))
       (dired-sidebar-switch-to-dir root)
       (when (and dired-sidebar-follow-file-at-point-on-toggle-open
