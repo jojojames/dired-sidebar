@@ -160,6 +160,11 @@ Warning: This is implemented by advising specific dired functions."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-disable-dired-collapse t
+  "Whether or not to disable `dired-collapse' if it's enabled."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 (defcustom dired-sidebar-special-refresh-commands
   '(dired-do-delete
     dired-do-rename
@@ -244,6 +249,10 @@ will check if buffer is stale through `auto-revert-mode'.")
 
   ;; We don't want extra details in the sidebar.
   (dired-hide-details-mode)
+
+  (when (and dired-sidebar-disable-dired-collapse
+             (bound-and-true-p dired-collapse-mode))
+    (dired-collapse-mode -1))
 
   (when dired-sidebar-delay-auto-revert-updates
     (setq-local buffer-stale-function #'dired-sidebar-buffer-stale-p)
