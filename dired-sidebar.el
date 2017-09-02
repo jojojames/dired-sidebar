@@ -129,7 +129,7 @@ This only takes effect if `dired-subtree' is installed."
 This needs to be set before calling command `dired-sidebar-mode'
 for the first time.
 
-If using ‘use-package’, set this in :init."
+If using `use-package', set this in :init."
   :type 'boolean
   :group 'dired-sidebar)
 
