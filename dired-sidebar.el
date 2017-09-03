@@ -307,17 +307,18 @@ With universal argument, use current directory."
   (interactive)
   (if (dired-sidebar-showing-sidebar-in-frame-p)
       (dired-sidebar-hide-sidebar)
-    (let* ((dir-to-open (or dir
-                         (when current-prefix-arg default-directory)
-                         (dired-sidebar-get-dir-to-open)))
-           (sidebar-buffer (dired-sidebar-get-or-create-buffer dir-to-open)))
+    (let* ((file-to-show (dired-sidebar-get-file-to-show))
+           (dir-to-show (or dir
+                            (when current-prefix-arg default-directory)
+                            (dired-sidebar-get-dir-to-show)))
+           (sidebar-buffer (dired-sidebar-get-or-create-buffer dir-to-show)))
       (dired-sidebar-show-sidebar sidebar-buffer)
       (if (and dired-sidebar-follow-file-at-point-on-toggle-open
-               buffer-file-name)
+               file-to-show)
           (if dired-sidebar-pop-to-sidebar-on-toggle-open
-              (dired-sidebar-point-at-file buffer-file-name dir-to-open)
+              (dired-sidebar-point-at-file file-to-show dir-to-show)
             (with-selected-window (selected-window)
-              (dired-sidebar-point-at-file buffer-file-name dir-to-open)))
+              (dired-sidebar-point-at-file file-to-show dir-to-show)))
         (when dired-sidebar-pop-to-sidebar-on-toggle-open
           (pop-to-buffer (dired-sidebar-sidebar-buffer-in-frame)))))))
 
@@ -379,7 +380,7 @@ This is dependent on `dired-subtree-cycle'."
   (let ((buffer (or b
                     ;; Only expect this to be hit when called interactively.
                     (dired-sidebar-get-or-create-buffer
-                     (dired-sidebar-get-dir-to-open)))))
+                     (dired-sidebar-get-dir-to-show)))))
     (display-buffer-in-side-window buffer '((side . left)))
     (let ((window (get-buffer-window buffer)))
       (set-window-dedicated-p window t)
@@ -643,9 +644,13 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
       (aw-select "Select Window")
     (next-window)))
 
-(defun dired-sidebar-get-dir-to-open ()
+(defun dired-sidebar-get-dir-to-show ()
   "Return the directory `dired-sidebar' should open to."
   (dired-sidebar-sidebar-root))
+
+(defun dired-sidebar-get-file-to-show ()
+  "Return the file `dired-sidebar' should open to."
+  buffer-file-name)
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
