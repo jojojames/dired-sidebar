@@ -1,8 +1,16 @@
-* Bootstrap
-  #+begin_src emacs-lisp :tangle yes
-  ;; git clone https://github.com/jojojames/dired-sidebar
-  ;; pwd
-  ;; Put this in the load-path.
+* Screenshots
+  #+CAPTION: Running dired at the same time
+  #+NAME: Runing Dired
+  [[./screenshots/run_dired.png]]
+
+  #+CAPTION: With dired-subtree
+  #+NAME: With Dired Subtree
+  [[./screenshots/with_dired_subtree.png]]
+* Installation
+** Melpa
+   #+begin_src emacs-lisp :tangle yes
+  ;; I recommend using use-package.
+  ;; https://github.com/jwiegley/use-package
 (use-package dired-subtree
   :ensure t
   :commands (dired-subtree-toggle dired-subtree-cycle)
@@ -10,17 +18,28 @@
   (setq dired-subtree-use-backgrounds nil))
 
 (use-package dired-sidebar
-  :load-path "What you got from pwd."
-  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
-  :ensure nil
+  :ensure t
   :commands (dired-sidebar-toggle-sidebar)
   :config
   (use-package all-the-icons-dired
     ;; M-x all-the-icons-install-fonts
     :ensure t
     :commands (all-the-icons-dired-mode)))
-  #+end_src
-* My Own Settings
+   #+end_src
+** Minimal Bootstrap using Git
+   #+begin_src sh :tangle yes
+   git clone https://github.com/jojojames/dired-sidebar
+   cd dired-sidebar
+   pwd # [Put this in load path.]
+   #+end_src
+
+   Add config to Emacs:
+   #+begin_src emacs-lisp :tangle yes
+   (add-to-list 'load-path "path from pwd")
+   (require 'dired-sidebar)
+   M-x dired-sidebar-toggle-sidebar
+   #+end_src
+* My Settings
   #+begin_src emacs-lisp :tangle yes
 (use-package dired-sidebar
   :load-path "~/.emacs.d/fork/dired-sidebar"
@@ -64,11 +83,7 @@
              ace-window
              aw-select))
   #+end_src
-* Screenshots
-  #+CAPTION: Running dired at the same time
-  #+NAME: Runing Dired
-  [[./screenshots/run_dired.png]]
+* Alternatives
+  https://github.com/Alexander-Miller/treemacs
 
-  #+CAPTION: With dired-subtree
-  #+NAME: With Dired Subtree
-  [[./screenshots/with_dired_subtree.png]]
+  https://github.com/jaypei/emacs-neotree
