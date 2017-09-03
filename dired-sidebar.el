@@ -301,29 +301,31 @@ will check if buffer is stale through `auto-revert-mode'.")
 ;;;###autoload
 (defun dired-sidebar-toggle-sidebar (&optional dir)
   "Toggle the project explorer window.
-Optional argument DIR Use DIR as sidebar root if available."
+Optional argument DIR Use DIR as sidebar root if available.
+
+With universal argument, use current directory."
   (interactive)
   (if (dired-sidebar-showing-sidebar-in-frame-p)
       (dired-sidebar-hide-sidebar)
-    (dired-sidebar-show-sidebar (when-let ((open-dir
-                                            (or dir (if current-prefix-arg
-                                                        default-directory
-                                                      nil))))
-                                  (dired-sidebar-get-or-create-buffer open-dir)))
-    (if (and dired-sidebar-follow-file-at-point-on-toggle-open
-             buffer-file-name)
-        (if dired-sidebar-pop-to-sidebar-on-toggle-open
-            (dired-sidebar-point-at-file buffer-file-name dir)
-          (with-selected-window (selected-window)
-            (dired-sidebar-point-at-file buffer-file-name dir)))
-      (when dired-sidebar-pop-to-sidebar-on-toggle-open
-        (pop-to-buffer (dired-sidebar-sidebar-buffer-in-frame))))))
+    (let* ((dir-to-open (or dir
+                         (when current-prefix-arg default-directory)
+                         (dired-sidebar-get-dir-to-open)))
+           (sidebar-buffer (dired-sidebar-get-or-create-buffer dir-to-open)))
+      (dired-sidebar-show-sidebar sidebar-buffer)
+      (if (and dired-sidebar-follow-file-at-point-on-toggle-open
+               buffer-file-name)
+          (if dired-sidebar-pop-to-sidebar-on-toggle-open
+              (dired-sidebar-point-at-file buffer-file-name dir-to-open)
+            (with-selected-window (selected-window)
+              (dired-sidebar-point-at-file buffer-file-name dir-to-open)))
+        (when dired-sidebar-pop-to-sidebar-on-toggle-open
+          (pop-to-buffer (dired-sidebar-sidebar-buffer-in-frame)))))))
 
-(defun dired-sidebar-point-at-file (name &optional parent)
+(defun dired-sidebar-point-at-file (name root)
   "Try to point at NAME from sidebar.
 
-Keep `dired' pointed at PARENT or function `dired-sidebar-sidebar-root'
-while cycling directories until NAME is found in PARENT path.
+Keep `dired' pointed at ROOT while cycling directories until
+NAME is found in ROOT path.
 
 This is dependent on `dired-subtree-cycle'."
   (let ((sidebar (dired-sidebar-sidebar-buffer-in-frame)))
@@ -335,8 +337,7 @@ This is dependent on `dired-subtree-cycle'."
       (progn
         (pop-to-buffer sidebar)
         (goto-char 0)
-        (let* ((root (or parent (dired-sidebar-sidebar-root)))
-               (path root)
+        (let* ((path root)
                ;; Imagine root is /root/var/ and name is
                ;; /root/var/a/b/c.
                ;; This will return a list of '\("a" "b" "c"\).
@@ -373,9 +374,12 @@ This is dependent on `dired-subtree-cycle'."
 
 ;;;###autoload
 (defun dired-sidebar-show-sidebar (&optional b)
-  "Show sidebar using B or use currect project root in the selected frame."
+  "Show sidebar displaying buffer B."
   (interactive)
-  (let ((buffer (or b (dired-sidebar-get-or-create-buffer))))
+  (let ((buffer (or b
+                    ;; Only expect this to be hit when called interactively.
+                    (dired-sidebar-get-or-create-buffer
+                     (dired-sidebar-get-dir-to-open)))))
     (display-buffer-in-side-window buffer '((side . left)))
     (let ((window (get-buffer-window buffer)))
       (set-window-dedicated-p window t)
@@ -517,11 +521,10 @@ the relevant file-directory clicked on by the mouse."
              dir))))
     (concat ":" (abbreviate-file-name b))))
 
-(defun dired-sidebar-get-or-create-buffer (&optional dir)
-  "Get or create a `dired-sidebar' buffer matching DIR."
+(defun dired-sidebar-get-or-create-buffer (root)
+  "Get or create a `dired-sidebar' buffer matching ROOT."
   (interactive)
-  (let* ((root (or dir (dired-sidebar-sidebar-root)))
-         (name (dired-sidebar-sidebar-buffer-name root)))
+  (let ((name (dired-sidebar-sidebar-buffer-name root)))
     (if-let ((existing-buffer (get-buffer name)))
         existing-buffer
       (let ((buffer (dired-noselect root)))
@@ -639,6 +642,10 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
   (if (fboundp 'aw-select)
       (aw-select "Select Window")
     (next-window)))
+
+(defun dired-sidebar-get-dir-to-open ()
+  "Return the directory `dired-sidebar' should open to."
+  (dired-sidebar-sidebar-root))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
