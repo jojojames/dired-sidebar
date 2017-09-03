@@ -618,13 +618,15 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
   "Handle `projectile-after-switch-project-hook'."
   (when (and (fboundp 'projectile-project-root)
              (dired-sidebar-showing-sidebar-in-frame-p))
-    (let ((root (projectile-project-root)))
-      (dired-sidebar-switch-to-dir root)
-      (when (and dired-sidebar-follow-file-at-point-on-toggle-open
-                 buffer-file-name)
-        ;; Wrap in `with-selected-window' because we don't want to pop to
-        ;; the sidebar buffer.
-        (with-selected-window (selected-window)
+    ;; Wrap in `with-selected-window' because we don't want to pop to
+    ;; the sidebar buffer.
+    ;; We also need to pick the correct selected-window to get the correct
+    ;; project root that we've switched to.
+    (with-selected-window (selected-window)
+      (let ((root (projectile-project-root)))
+        (dired-sidebar-switch-to-dir root)
+        (when (and dired-sidebar-follow-file-at-point-on-toggle-open
+                   buffer-file-name)
           (dired-sidebar-point-at-file
            buffer-file-name root))))))
 
