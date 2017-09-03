@@ -346,6 +346,7 @@ This is dependent on `dired-subtree-cycle'."
     (pop-to-buffer sidebar)
     (when (and name
                (fboundp 'dired-subtree-cycle)
+               (or (featurep 'dired-subtree) (require 'dired-subtree nil t))
                ;; Checking for a private method. *shrug*
                (fboundp 'dired-subtree--is-expanded-p))
       (progn
