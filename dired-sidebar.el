@@ -133,6 +133,19 @@ If using `use-package', set this in :init."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-use-magit-integration t
+  "Whether to integrate with `magit-mode'.
+
+When true:
+
+When finding file to point at for
+`dired-sidebar-follow-file-at-point-on-toggle-open', use file at point
+in `magit' buffer.
+
+When finding root directory for sidebar, use directory specified by `magit'."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 (defcustom dired-sidebar-cycle-subtree-on-click t
   "Whether to cycle subtree on click.
 
@@ -646,11 +659,24 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 
 (defun dired-sidebar-get-dir-to-show ()
   "Return the directory `dired-sidebar' should open to."
-  (dired-sidebar-sidebar-root))
+  (cond
+   ((and dired-sidebar-use-magit-integration
+         (derived-mode-p 'magit-mode)
+         (fboundp 'magit-toplevel))
+    (magit-toplevel))
+   (:default
+    (dired-sidebar-sidebar-root))))
 
 (defun dired-sidebar-get-file-to-show ()
   "Return the file `dired-sidebar' should open to."
-  buffer-file-name)
+  (cond
+   ((and dired-sidebar-use-magit-integration
+         (derived-mode-p 'magit-mode)
+         (fboundp 'magit-file-at-point)
+         (magit-file-at-point))
+    (expand-file-name (magit-file-at-point)))
+   (:default
+    buffer-file-name)))
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
