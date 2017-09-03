@@ -305,8 +305,11 @@ Optional argument DIR Use DIR as sidebar root if available."
   (interactive)
   (if (dired-sidebar-showing-sidebar-in-frame-p)
       (dired-sidebar-hide-sidebar)
-    (dired-sidebar-show-sidebar (when dir
-                                  (dired-sidebar-get-or-create-buffer dir)))
+    (dired-sidebar-show-sidebar (when-let ((open-dir
+                                            (or dir (if current-prefix-arg
+                                                        default-directory
+                                                      nil))))
+                                  (dired-sidebar-get-or-create-buffer open-dir)))
     (if (and dired-sidebar-follow-file-at-point-on-toggle-open
              buffer-file-name)
         (if dired-sidebar-pop-to-sidebar-on-toggle-open
@@ -365,7 +368,8 @@ This is dependent on `dired-subtree-cycle'."
 (defun dired-sidebar-toggle-with-current-directory ()
   "Like `dired-sidebar-toggle-sidebar' but use current-directory."
   (interactive)
-  (dired-sidebar-toggle-sidebar default-directory))
+  (let ((current-prefix-arg '(4))) ; C-u
+    (call-interactively #'dired-sidebar-toggle-sidebar)))
 
 ;;;###autoload
 (defun dired-sidebar-show-sidebar (&optional b)
