@@ -188,6 +188,19 @@ Warning: This is implemented by advising specific dired functions."
   :type 'list
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-refresh-on-special-command-instantly t
+  "Whether or not to revert buffer when special command is called.
+
+Special command is a command from `dired-sidebar-special-refresh-commands'.
+
+If this is true, trigger `revert-buffer' when special command is called.
+Otherwise, schedule the refresh for later.
+
+Keeping this as true will make those special commands update the UI instantly
+at the cost of *possibly* some extra delay."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 (defcustom dired-sidebar-alternate-select-window-function
   #'dired-sidebar-default-alternate-select-window
   "Function to call when using alternative window selection.
@@ -287,7 +300,7 @@ will check if buffer is stale through `auto-revert-mode'.")
 
   (when dired-sidebar-refresh-on-special-commands
     (mapc (lambda (x)
-            (advice-add x :after #'dired-sidebar-schedule-refresh))
+            (advice-add x :after #'dired-sidebar-refresh-or-schedule-refresh))
           dired-sidebar-special-refresh-commands))
 
   (when (and
@@ -631,9 +644,11 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
     (setq dired-sidebar-check-for-stale-buffer-p nil)
     (dired-buffer-stale-p noconfirm)))
 
-(defun dired-sidebar-schedule-refresh (&rest _)
-  "Schedule sidebar to refresh when ready."
-  (setq dired-sidebar-check-for-stale-buffer-p t))
+(defun dired-sidebar-refresh-or-schedule-refresh (&rest _)
+  "Refresh or schedule refresh of sidebar buffer."
+  (if dired-sidebar-refresh-on-special-command-instantly
+      (revert-buffer)
+    (setq dired-sidebar-check-for-stale-buffer-p t)))
 
 (defun dired-sidebar-handle-projectile-switch-project ()
   "Handle `projectile-after-switch-project-hook'."
