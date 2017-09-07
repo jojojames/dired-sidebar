@@ -42,9 +42,8 @@
 * My Settings
   #+begin_src emacs-lisp :tangle yes
 (use-package dired-sidebar
-  :load-path "~/.emacs.d/fork/dired-sidebar"
   :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
-  :ensure nil
+  :ensure t
   :commands (dired-sidebar-toggle-sidebar)
   :config
   (setq dired-sidebar-use-custom-font t)
