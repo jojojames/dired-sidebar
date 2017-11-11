@@ -675,8 +675,8 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 (defun dired-sidebar-get-dir-to-show ()
   "Return the directory `dired-sidebar' should open to."
   (cond
-   ((and dired-sidebar-use-magit-integration
-         (derived-mode-p 'magit-mode)
+   ((and (derived-mode-p 'magit-mode)
+         dired-sidebar-use-magit-integration
          (fboundp 'magit-toplevel))
     (magit-toplevel))
    (:default
