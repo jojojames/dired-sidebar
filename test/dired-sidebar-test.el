@@ -1,4 +1,5 @@
-;;; dired-sidebar-test.el --- Tests for dired-sidebar
+;;; dired-sidebar-test.el --- Tests for dired-sidebar -*- lexical-binding: t -*-
+
 (require 'dired-sidebar)
 
 (ert-deftest dired-sidebar-blank-test ()
