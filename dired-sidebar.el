@@ -266,15 +266,17 @@ will check if buffer is stale through `auto-revert-mode'.")
     (when dired-sidebar-use-evil-integration
       (with-eval-after-load 'evil
         (when (fboundp 'dired-subtree-toggle)
+          (when (fboundp 'evil-define-minor-mode-key)
+            (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
+              [tab] 'dired-subtree-toggle)))
+        (when (fboundp 'evil-define-minor-mode-key)
           (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
-            [tab] 'dired-subtree-toggle))
-        (evil-define-minor-mode-key 'normal 'dired-sidebar-mode
-          (kbd "C-m") 'dired-sidebar-find-file
-          (kbd "RET") 'dired-sidebar-find-file
-          (kbd "<return>") 'dired-sidebar-find-file
-          "^" 'dired-sidebar-up-directory
-          (kbd "C-o") 'dired-sidebar-find-file-alt
-          [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file)))
+            (kbd "C-m") 'dired-sidebar-find-file
+            (kbd "RET") 'dired-sidebar-find-file
+            (kbd "<return>") 'dired-sidebar-find-file
+            "^" 'dired-sidebar-up-directory
+            (kbd "C-o") 'dired-sidebar-find-file-alt
+            [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file))))
     map)
   "Keymap used for symbol `dired-sidebar-mode'.")
 
@@ -290,6 +292,7 @@ will check if buffer is stale through `auto-revert-mode'.")
   (dired-hide-details-mode)
 
   (when (and dired-sidebar-disable-dired-collapse
+             (fboundp 'dired-collapse-mode)
              (bound-and-true-p dired-collapse-mode))
     (dired-collapse-mode -1))
 
