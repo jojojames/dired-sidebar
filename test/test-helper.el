@@ -15,8 +15,8 @@
 
 ;; FIXME: Adding `f' as a dependency just for this line.
 (require 'f)
-(let ((smart-jump-dir (f-parent (f-dirname (f-this-file)))))
-  (add-to-list 'load-path smart-jump-dir))
+(let ((dired-sidebar-dir (f-parent (f-dirname (f-this-file)))))
+  (add-to-list 'load-path dired-sidebar-dir))
 (require 'dired-sidebar)
 
 ;;; test-helper.el ends here
