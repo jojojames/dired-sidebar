@@ -84,3 +84,10 @@
   https://github.com/Alexander-Miller/treemacs
 
   https://github.com/jaypei/emacs-neotree
+* Running Tests
+  #+begin_src sh :tangle yes
+  cask
+  make compile
+  make lint
+  make test
+  #+end_src
