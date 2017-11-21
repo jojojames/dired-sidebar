@@ -89,6 +89,8 @@
   https://github.com/Alexander-Miller/treemacs
 
   https://github.com/jaypei/emacs-neotree
+
+  https://github.com/sabof/project-explorer
 * Running Tests
   #+begin_src sh :tangle yes
   cask
