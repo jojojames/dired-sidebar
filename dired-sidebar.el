@@ -397,7 +397,7 @@ This is dependent on `dired-subtree-cycle'."
                   ;; Making sure there's a space in front of the name
                   ;; skips matches that contains the name as a
                   ;; substring which is probably good enough...
-                  (re-search-forward (concat "^.*[[:space:]]\\"
+                  (re-search-forward (concat "^.*[[:space:]]"
                                              (regexp-quote dir)))))
             (re-search-forward (concat "^.*[[:space:]]" (regexp-quote dir)))
             ;; Check if subtree has already been expanded.
