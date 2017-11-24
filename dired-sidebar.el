@@ -433,7 +433,7 @@ This is dependent on `dired-subtree-cycle'."
 (defun dired-sidebar-hide-sidebar ()
   "Hide the sidebar in the selected frame."
   (interactive)
-  (let ((buffer (dired-sidebar-sidebar-buffer-in-frame)))
+  (when-let ((buffer (dired-sidebar-sidebar-buffer-in-frame)))
     (delete-window (get-buffer-window buffer))
     (dired-sidebar-update-state-in-frame nil)))
 

@@ -16,6 +16,6 @@ lint:
 	-f package-lint-batch-and-exit *.el
 
 test:
-	cask exec ert-runner
+	cask exec ert-runner --win
 
 .PHONY: test
