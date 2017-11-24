@@ -16,12 +16,6 @@
    #+begin_src emacs-lisp :tangle yes
   ;; I recommend using use-package.
   ;; https://github.com/jwiegley/use-package
-(use-package dired-subtree
-  :ensure t
-  :commands (dired-subtree-toggle dired-subtree-cycle)
-  :config
-  (setq dired-subtree-use-backgrounds nil))
-
 (use-package dired-sidebar
   :ensure t
   :commands (dired-sidebar-toggle-sidebar)
@@ -70,20 +64,6 @@
     :ensure t
     :commands (all-the-icons-dired-mode)))
 
-(use-package dired-subtree
-  :ensure t
-  :commands (dired-subtree-toggle dired-subtree-cycle)
-  :config
-  (setq dired-subtree-line-prefix "_ ")
-  (setq dired-subtree-use-backgrounds nil))
-
-(use-package ace-window
-  :ensure t
-  :commands (ace-delete-window
-             ace-swap-window
-             ace-delete-other-windows
-             ace-window
-             aw-select))
   #+end_src
 * Alternatives
   https://github.com/Alexander-Miller/treemacs
