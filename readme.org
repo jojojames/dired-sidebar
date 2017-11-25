@@ -13,9 +13,9 @@
   [[./screenshots/with_dired_subtree.png]]
 * Installation
 ** Melpa
+   I recommend using [[https://github.com/jwiegley/use-package][use-package]].
+
    #+begin_src emacs-lisp :tangle yes
-  ;; I recommend using use-package.
-  ;; https://github.com/jwiegley/use-package
 (use-package dired-sidebar
   :ensure t
   :commands (dired-sidebar-toggle-sidebar)
