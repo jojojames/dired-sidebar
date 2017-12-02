@@ -47,6 +47,15 @@
 (require 'face-remap)
 (eval-when-compile (require 'subr-x))
 
+;; Compatibility
+(eval-and-compile
+  (when (version< emacs-version "26")
+    (with-no-warnings
+      (defalias 'if-let* #'if-let)
+      (defalias 'when-let* #'when-let)
+      (function-put #'if-let* 'lisp-indent-function 2)
+      (function-put #'when-let* 'lisp-indent-function 1))))
+
 ;; Customizations
 
 (defgroup dired-sidebar nil
@@ -482,7 +491,7 @@ This is dependent on `dired-subtree-cycle'."
 (defun dired-sidebar-hide-sidebar ()
   "Hide the sidebar in the selected frame."
   (interactive)
-  (when-let ((buffer (dired-sidebar-sidebar-buffer-in-frame)))
+  (when-let* ((buffer (dired-sidebar-sidebar-buffer-in-frame)))
     (delete-window (get-buffer-window buffer))
     (dired-sidebar-update-state-in-frame nil)))
 
@@ -611,7 +620,7 @@ the relevant file-directory clicked on by the mouse."
   "Get or create a `dired-sidebar' buffer matching ROOT."
   (interactive)
   (let ((name (dired-sidebar-sidebar-buffer-name root)))
-    (if-let ((existing-buffer (get-buffer name)))
+    (if-let* ((existing-buffer (get-buffer name)))
         existing-buffer
       (let ((buffer (dired-noselect root)))
         ;; When opening a sidebar while in a dired buffer that matches
@@ -674,7 +683,7 @@ Check if F or selected frame contains a sidebar and return
 corresponding buffer if buffer has a window attached to it.
 
 Return buffer if so."
-  (if-let (buffer (alist-get (or f (selected-frame)) dired-sidebar-alist))
+  (if-let* ((buffer (alist-get (or f (selected-frame)) dired-sidebar-alist)))
       (if (get-buffer-window buffer)
           buffer
         nil)
@@ -813,16 +822,16 @@ This is somewhat experimental/hacky."
   (run-with-idle-timer
    dired-sidebar-tui-update-delay nil
    (lambda ()
-     (when-let (buffer (dired-sidebar-showing-sidebar-in-frame-p
-                        (selected-frame)))
+     (when-let* ((buffer (dired-sidebar-showing-sidebar-in-frame-p
+                          (selected-frame))))
        (with-current-buffer buffer
          (dired-revert)
          (recenter))))))
 
 (defun dired-sidebar-tui-reset-in-sidebar (&rest _)
   "Runs `dired-sidebar-tui-dired-reset' in current `dired-sidebar' buffer."
-  (when-let (buffer (dired-sidebar-showing-sidebar-in-frame-p
-                     (selected-frame)))
+  (when-let* ((buffer (dired-sidebar-showing-sidebar-in-frame-p
+                       (selected-frame))))
     (with-current-buffer buffer
       (dired-sidebar-tui-dired-reset))))
 
