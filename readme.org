@@ -12,7 +12,7 @@
   #+NAME: With Dired Subtree
   [[./screenshots/with_dired_subtree.png]]
 
-  #+CAPTION Text User Interface
+  #+CAPTION: Text User Interface
   #+NAME: With Text UI
   [[./screenshots/tui.png]]
 * Installation
