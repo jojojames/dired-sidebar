@@ -8,7 +8,10 @@
 (defvar test-data-dir)
 (defvar test-data-dir-basic)
 
-(setq test-data-dir (f-expand "./data"))
+;; make runs the test starting from a parent directory.
+(setq test-data-dir (f-expand (if (string-match-p "/test/" default-directory)
+                                  "./data"
+                                "./test/data")))
 (setq test-data-dir-basic (f-join test-data-dir "basic"))
 
 ;; https://github.com/rejeep/ert-runner.el/issues/24
@@ -27,9 +30,9 @@
 (ert-deftest dired-sidebar-toggle-sidebar-opens-sidebar-when-hidden ()
   "Test `dired-sidebar-toggle-sidebar' opens sidebar if sidebar is not
 already showing."
-  (let ((default-directory test-data-dir-basic)
-        (A-buffer (find-file-noselect
-                   (f-join default-directory "A") t)))
+  (let* ((default-directory test-data-dir-basic)
+         (A-buffer (find-file-noselect
+                    (f-join default-directory "A") t)))
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (should (dired-sidebar-sidebar-buffer-in-frame)))
@@ -38,9 +41,9 @@ already showing."
 
 (ert-deftest dired-sidebar-hide-sidebar-hides-sidebar ()
   "Test `dired-sidebar-hide-sidebar' actually hides sidebar."
-  (let ((default-directory test-data-dir-basic)
-        (A-buffer (find-file-noselect
-                   (f-join default-directory "A") t)))
+  (let* ((default-directory test-data-dir-basic)
+         (A-buffer (find-file-noselect
+                    (f-join default-directory "A") t)))
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (should (equal (current-buffer)
@@ -51,10 +54,10 @@ already showing."
 
 (ert-deftest dired-sidebar-pop-to-sidebar-on-toggle-open ()
   "Test behavior around `dired-sidebar-pop-to-sidebar-on-toggle-open'."
-  (let ((default-directory test-data-dir-basic)
-        (dired-sidebar-pop-to-sidebar-on-toggle-open t)
-        (A-buffer (find-file-noselect
-                   (f-join default-directory "A") t)))
+  (let* ((default-directory test-data-dir-basic)
+         (dired-sidebar-pop-to-sidebar-on-toggle-open t)
+         (A-buffer (find-file-noselect
+                    (f-join default-directory "A") t)))
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (should (equal (current-buffer)
