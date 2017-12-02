@@ -82,4 +82,25 @@ already showing."
         (should (equal (length (window-list)) current-window-count))))
     (kill-buffer A-buffer)))
 
+(ert-deftest dired-sidebar-follows-file-on-open ()
+  "Test behavior when setting
+`dired-sidebar-follow-file-at-point-on-toggle-open'."
+  (let* ((default-directory test-data-dir-basic)
+         (dired-sidebar-follow-file-at-point-on-toggle-open t)
+         (A-buffer (find-file-noselect
+                    (f-join default-directory "A") t)))
+    (with-current-buffer A-buffer
+      (call-interactively 'dired-sidebar-toggle-sidebar)
+      (should (string-suffix-p "A" (string-trim (thing-at-point 'line t))))
+      (forward-line 1))
+
+    (dired-sidebar-hide-sidebar)
+    (with-current-buffer A-buffer
+      (let ((dired-sidebar-follow-file-at-point-on-toggle-open nil))
+        (call-interactively 'dired-sidebar-toggle-sidebar)
+        (message (string-trim (thing-at-point 'line t)))
+        (should (not (string-suffix-p "A" (string-trim (thing-at-point 'line t)))))))
+    (kill-buffer A-buffer)
+    (dired-sidebar-hide-sidebar)))
+
 ;;; dired-sidebar-test.el ends here
