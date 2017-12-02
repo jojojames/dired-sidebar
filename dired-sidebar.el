@@ -90,6 +90,15 @@ This has no effect in Terminals."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-use-tui t
+  "Use text user interface.
+
+This adds + and - 'icons' to the UI.
+
+This only takes effect if `dired-sidebar-use-all-the-icons' is not enabled."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 (defcustom dired-sidebar-width 35
   "Width of the `dired-sidebar' buffer."
   :type 'integer
@@ -178,6 +187,13 @@ When true, only allow function `auto-revert-mode' to update every
 (defcustom dired-sidebar-follow-file-idle-delay 2
   "The time in idle seconds to wait before checking if sidebar should
 follow file."
+  :type 'number
+  :group 'dired-sidebar)
+
+(defcustom dired-sidebar-tui-update-delay 0.05
+  "The time in idle seconds to wait before updating tui interface.
+
+This only takes effect if `all-the-icons-dired' is disabled."
   :type 'number
   :group 'dired-sidebar)
 
@@ -332,11 +348,13 @@ will check if buffer is stale through `auto-revert-mode'.")
             (advice-add x :after #'dired-sidebar-refresh-or-schedule-refresh))
           dired-sidebar-special-refresh-commands))
 
-  (when (and
-         dired-sidebar-use-all-the-icons
-         (display-graphic-p)
-         (fboundp 'all-the-icons-dired-mode))
-    (all-the-icons-dired-mode))
+  (if (and
+       dired-sidebar-use-all-the-icons
+       (display-graphic-p)
+       (fboundp 'all-the-icons-dired-mode))
+      (all-the-icons-dired-mode)
+    (when dired-sidebar-use-tui
+      (dired-sidebar-setup-tui)))
 
   (when dired-sidebar-use-custom-font
     (dired-sidebar-set-font))
@@ -759,6 +777,69 @@ This is somewhat experimental/hacky."
     (forward-line -1)
     (kill-whole-line)
     result))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar-local dired-sidebar-tui-dired-displayed nil
+  "Flags whether icons have been added.")
+
+(defun dired-sidebar-tui-dired-reset (&optional _arg _noconfirm)
+  "Function used as advice when redisplaying buffer."
+  (setq-local dired-sidebar-tui-dired-displayed nil))
+
+(defun dired-sidebar-tui-dired-display ()
+  "Display the icons of files in a dired buffer."
+  (interactive)
+  (when (or t (and (not dired-sidebar-tui-dired-displayed) dired-subdir-alist))
+    (setq-local dired-sidebar-tui-dired-displayed t)
+    (let ((inhibit-read-only t))
+      (save-excursion
+        (goto-char (point-min))
+        (while (not (eobp))
+          (when (dired-move-to-filename nil)
+            (dired-move-to-filename)
+            (let ((file (dired-get-filename 'verbatim t)))
+              (unless (member file '("." ".."))
+                (let ((filename (dired-get-filename nil t)))
+                  (if (file-directory-p filename)
+                      (if (dired-subtree--is-expanded-p)
+                          (insert "- ")
+                        (insert "+ "))
+                    (insert "  "))))))
+          (forward-line 1))))))
+
+(defun dired-sidebar-tui-update-with-delay (&rest _)
+  "Update tui interface after a delay."
+  (run-with-idle-timer
+   dired-sidebar-tui-update-delay nil
+   (lambda ()
+     (when-let (buffer (dired-sidebar-showing-sidebar-in-frame-p
+                        (selected-frame)))
+       (with-current-buffer buffer
+         (dired-revert)
+         (recenter))))))
+
+(defun dired-sidebar-tui-reset-in-sidebar (&rest _)
+  "Runs `dired-sidebar-tui-dired-reset' in current `dired-sidebar' buffer."
+  (when-let (buffer (dired-sidebar-showing-sidebar-in-frame-p
+                     (selected-frame)))
+    (with-current-buffer buffer
+      (dired-sidebar-tui-dired-reset))))
+
+(defun dired-sidebar-setup-tui ()
+  "Sets up text user interface for `dired-sidebar'.
+
+This is used in place of `all-the-icons' to add directory indicators.
+
+e.g. + and -."
+  (add-hook 'dired-after-readin-hook
+            'dired-sidebar-tui-dired-display :append :local)
+  (advice-add 'dired-revert :before 'dired-sidebar-tui-reset-in-sidebar)
+  (setq-local dired-subtree-line-prefix " ")
+  (advice-add 'dired-subtree-toggle :after #'dired-sidebar-tui-update-with-delay)
+  (dired-revert))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here

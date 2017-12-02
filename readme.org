@@ -11,6 +11,10 @@
   #+CAPTION: With dired-subtree
   #+NAME: With Dired Subtree
   [[./screenshots/with_dired_subtree.png]]
+
+  #+CAPTION Text User Interface
+  #+NAME: With Text UI
+  [[./screenshots/tui.png]]
 * Installation
 ** Melpa
    I recommend using [[https://github.com/jwiegley/use-package][use-package]].
