@@ -225,6 +225,11 @@ with a prefix arg or when `dired-sidebar-find-file-alt' is called."
   :type 'function
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-recenter-cursor-on-follow-file t
+  "Whether or not to center cursor when pointing at file."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 ;; Internal
 
 (defvar dired-sidebar-alist '()
@@ -424,7 +429,9 @@ This is dependent on `dired-subtree-cycle'."
               ;; This will probably throw an error when trying to expand
               ;; directories that have been collapsed by `dired-collapse'.
               (dired-subtree-cycle))
-            (setq path (concat path "/"))))))))
+            (setq path (concat path "/")))))
+      (when dired-sidebar-recenter-cursor-on-follow-file
+        (recenter nil)))))
 
 ;;;###autoload
 (defun dired-sidebar-toggle-with-current-directory ()
