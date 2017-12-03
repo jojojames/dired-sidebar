@@ -726,7 +726,9 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 (defun dired-sidebar-refresh-or-schedule-refresh (&rest _)
   "Refresh or schedule refresh of sidebar buffer."
   (if dired-sidebar-refresh-on-special-command-instantly
-      (revert-buffer)
+      (when-let* ((sidebar (dired-sidebar-sidebar-buffer-in-frame)))
+        (with-current-buffer sidebar
+          (revert-buffer)))
     (setq dired-sidebar-check-for-stale-buffer-p t)))
 
 (defun dired-sidebar-follow-file-in-project ()
