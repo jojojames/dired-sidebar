@@ -698,16 +698,12 @@ Check if F or selected frame contains a sidebar and return
 corresponding buffer if buffer has a window attached to it.
 
 Return buffer if so."
-  (if-let* ((buffer (alist-get (or f (selected-frame)) dired-sidebar-alist)))
-      (if (get-buffer-window buffer)
-          buffer
-        nil)
-    nil))
+  (when-let* ((buffer (dired-sidebar-sidebar-buffer-in-frame f)))
+    (get-buffer-window buffer)))
 
 (defun dired-sidebar-sidebar-buffer-in-frame (&optional f)
   "Return the current sidebar buffer in F or selected frame."
-  (let ((frame (or f (selected-frame))))
-    (alist-get frame dired-sidebar-alist)))
+  (alist-get (or f (selected-frame)) dired-sidebar-alist))
 
 (defun dired-sidebar-switch-to-dir (dir)
   "Update buffer with DIR as root."
@@ -837,16 +833,14 @@ This is somewhat experimental/hacky."
   (run-with-idle-timer
    dired-sidebar-tui-update-delay nil
    (lambda ()
-     (when-let* ((buffer (dired-sidebar-showing-sidebar-in-frame-p
-                          (selected-frame))))
+     (when-let* ((buffer (dired-sidebar-sidebar-buffer-in-frame)))
        (with-current-buffer buffer
          (dired-revert)
          (recenter))))))
 
 (defun dired-sidebar-tui-reset-in-sidebar (&rest _)
   "Runs `dired-sidebar-tui-dired-reset' in current `dired-sidebar' buffer."
-  (when-let* ((buffer (dired-sidebar-showing-sidebar-in-frame-p
-                       (selected-frame))))
+  (when-let* ((buffer (dired-sidebar-sidebar-buffer-in-frame)))
     (with-current-buffer buffer
       (dired-sidebar-tui-dired-reset))))
 
