@@ -326,7 +326,8 @@ will check if buffer is stale through `auto-revert-mode'.")
         ;; immediately, I did not see that happen when restoring `dired-sidebar'
         ;; with `desktop-read'.
         ;; Force keymaps to normalize.
-        (evil-normalize-keymaps)))
+        (when (fboundp 'evil-normalize-keymaps)
+          (evil-normalize-keymaps))))
     map)
   "Keymap used for symbol `dired-sidebar-mode'.")
 
