@@ -400,11 +400,7 @@ will check if buffer is stale through `auto-revert-mode'.")
     (setq dired-sidebar-follow-file-timer
           (run-with-idle-timer
            dired-sidebar-follow-file-idle-delay
-           t (lambda ()
-               (when (and
-                      (dired-sidebar-showing-sidebar-in-frame-p (selected-frame))
-                      buffer-file-name)
-                 (dired-sidebar-follow-file-in-project))))))
+           t #'dired-sidebar-follow-file-in-project)))
 
   (dired-unadvertise (dired-current-directory))
   (dired-sidebar-update-buffer-name)
@@ -740,24 +736,17 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 
 (defun dired-sidebar-follow-file-in-project ()
   "Follow new file in project."
-  (when (and
-         (fboundp 'projectile-project-p)
-         (fboundp 'projectile-project-root)
-         (dired-sidebar-showing-sidebar-in-frame-p))
+  (when (dired-sidebar-showing-sidebar-in-frame-p)
     ;; Wrap in `with-selected-window' because we don't want to pop to
     ;; the sidebar buffer.
     ;; We also need to pick the correct selected-window to get the correct
     ;; project root that we've switched to.
     (with-selected-window (selected-window)
-      (let ((root (or (and
-                       (projectile-project-p)
-                       (projectile-project-root))
-                      default-directory)))
+      (let ((root (dired-sidebar-get-dir-to-show)))
         (dired-sidebar-switch-to-dir root)
-        (when (and dired-sidebar-follow-file-at-point-on-toggle-open
-                   buffer-file-name)
-          (dired-sidebar-point-at-file
-           buffer-file-name root))))))
+        (when dired-sidebar-follow-file-at-point-on-toggle-open
+          (when-let* ((file (dired-sidebar-get-file-to-show)))
+            (dired-sidebar-point-at-file file root)))))))
 
 (defun dired-sidebar-default-alternate-select-window ()
   "Default function for `dired-sidebar-alternate-select-window-function'."
@@ -779,7 +768,9 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
     (dired-sidebar-sidebar-root))))
 
 (defun dired-sidebar-get-file-to-show ()
-  "Return the file `dired-sidebar' should open to."
+  "Return the file `dired-sidebar' should open to.
+
+This may return nil if there's no suitable file to show."
   (cond
    ((and dired-sidebar-use-magit-integration
          (derived-mode-p 'magit-mode)
