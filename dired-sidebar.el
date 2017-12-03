@@ -255,6 +255,11 @@ with a prefix arg or when `dired-sidebar-find-file-alt' is called."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-display-autorevert-messages nil
+  "Whether or not to display `autorevert' messages."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 ;; Internal
 
 (defvar dired-sidebar-alist '()
@@ -333,6 +338,11 @@ will check if buffer is stale through `auto-revert-mode'.")
              (fboundp 'dired-collapse-mode)
              (bound-and-true-p dired-collapse-mode))
     (dired-collapse-mode -1))
+
+  (when (and
+         (not dired-sidebar-display-autorevert-messages)
+         (boundp 'auto-revert-verbose))
+    (setq-local auto-revert-verbose nil))
 
   (when dired-sidebar-delay-auto-revert-updates
     (setq-local buffer-stale-function #'dired-sidebar-buffer-stale-p)
