@@ -4,10 +4,6 @@
 [[https://melpa.org/#/dired-sidebar][file:https://melpa.org/packages/dired-sidebar-badge.svg]]
 
 * Screenshots
-  #+CAPTION: Running dired at the same time
-  #+NAME: Runing Dired
-  [[./screenshots/run_dired.png]]
-
   #+CAPTION: With dired-subtree
   #+NAME: With Dired Subtree
   [[./screenshots/with_dired_subtree.png]]
@@ -69,6 +65,64 @@
     :commands (all-the-icons-dired-mode)))
 
   #+end_src
+
+  For configuration, I recommend looking at the defcustoms in ~dired-sidebar.el~.
+* Features
+** Dired
+   As a result of using ~dired~ as a base, many features and functionality already
+   exist in a polished state with standard keybindings an Emacs user will already
+   be familiar with. Because of this ~dired-sidebar~'s codebase can stay small and lean,
+   serving as the glue to several different packages.
+** Fast
+   Having used the [[*Alternatives][alternatives]] listed below, in my opinion,
+   ~dired-sidebar~ is the fastest of the bunch.
+
+   Trying to open and navigate in emacs/src/lisp (or another directory I've forgotten)
+   led to writing my own sidebar as I was not satisfied with the speed of the other drawers.
+** Multiple Frames
+   Sidebar may be used in multiple frames with each frame having its own sidebar state.
+** File Following
+   Sidebar can be periodically set to refresh to reflect the currently selected file.
+
+   When Sidebar is initially opened, folders will be automatically expanded to
+   point to the current file.
+** Mouse Support
+   Close/expand folders and open files with left click.
+** Session Persistence
+   Leverages ~dired~'s ~desktop-save-mode~ support for persistence.
+** Projectile
+   Integrated with [[https://github.com/bbatsov/projectile][projectile]].
+
+   Sidebar opens up with ~projectile~'s root as sidebar's root.
+   Sidebar will also automatically update its root when projectile changes root.
+** Dired Subtree
+   Integrated with [[https://github.com/Fuco1/dired-hacks][dired-subtree]].
+
+   Close and expand folders with dired-subtree.
+** Ace Window
+   Integrated with [[https://github.com/abo-abo/ace-window][ace-window]].
+
+   Select the window files are to be opened in.
+** File Watching / Automatic Refresh
+   ~dired-sidebar~ will automatically update to reflect file changes as well as
+   after a few special commands.
+
+   Take a look at ~dired-sidebar-refresh-on-special-commands~ and
+   ~dired-sidebar-special-refresh-commands~ for more configuration.
+** All The Icons Integration
+   Uses [[https://github.com/jtbm37/all-the-icons-dired][all-the-icons]] for icons.
+** Terminal Support
+   Icons will be replaced with "+" and "-" to indicate folder nesting in terminals.
+** Evil Integration
+   Keys are bound for [[https://github.com/emacs-evil/evil][evil]].
+** Magit Integration
+   Integrated with [[https://github.com/magit/magit][magit]].
+
+   Toggling the sidebar in ~magit~ sets sidebar's root at ~magit~'s directory.
+   If point was on a file in ~magit~, point at the file upon opening ~dired-sidebar~.
+** Dependencies
+   Only ~dired-subtree~ is required. The other integrations are optional
+   and dynamically detected.
 * Alternatives
   https://github.com/Alexander-Miller/treemacs
 
