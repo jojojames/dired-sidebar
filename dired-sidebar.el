@@ -401,7 +401,8 @@ will check if buffer is stale through `auto-revert-mode'.")
                  (dired-sidebar-follow-file-in-project))))))
 
   (dired-unadvertise (dired-current-directory))
-  (dired-sidebar-update-buffer-name))
+  (dired-sidebar-update-buffer-name)
+  (dired-sidebar-update-state-in-frame (current-buffer)))
 
 ;; User Interface
 
