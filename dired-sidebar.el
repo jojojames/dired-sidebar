@@ -223,7 +223,12 @@ Warning: This is implemented by advising specific dired functions."
     dired-do-rename
     dired-do-copy
     dired-do-flagged-delete
-    dired-create-directory)
+    dired-create-directory
+    delete-file
+    save-buffer
+    evil-write
+    evil-write-all
+    evil-save)
   "A list of commands that will trigger a refresh of the sidebar."
   :type 'list
   :group 'dired-sidebar)
