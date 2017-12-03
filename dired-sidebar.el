@@ -321,7 +321,12 @@ will check if buffer is stale through `auto-revert-mode'.")
             (kbd "<return>") 'dired-sidebar-find-file
             "^" 'dired-sidebar-up-directory
             (kbd "C-o") 'dired-sidebar-find-file-alt
-            [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file))))
+            [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file))
+        ;; Although `evil-define-minor-mode-key' is supposed to define bindings
+        ;; immediately, I did not see that happen when restoring `dired-sidebar'
+        ;; with `desktop-read'.
+        ;; Force keymaps to normalize.
+        (evil-normalize-keymaps)))
     map)
   "Keymap used for symbol `dired-sidebar-mode'.")
 
