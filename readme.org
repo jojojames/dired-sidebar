@@ -4,13 +4,17 @@
 [[https://melpa.org/#/dired-sidebar][file:https://melpa.org/packages/dired-sidebar-badge.svg]]
 
 * Screenshots
-  #+CAPTION: With dired-subtree
-  #+NAME: With Dired Subtree
+  With All The Icons
   [[./screenshots/with_dired_subtree.png]]
 
+  With Arrows
+  [[./screenshots/arrows.png]]
+
+  With Text UI
   #+CAPTION: Text User Interface
   #+NAME: With Text UI
   [[./screenshots/tui.png]]
+
 * Installation
 ** Melpa
    I recommend using [[https://github.com/jwiegley/use-package][use-package]].

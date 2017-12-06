@@ -812,7 +812,9 @@ This is somewhat experimental/hacky."
   (interactive)
   (when (or t (and (not dired-sidebar-tui-dired-displayed) dired-subdir-alist))
     (setq-local dired-sidebar-tui-dired-displayed t)
-    (let ((inhibit-read-only t))
+    (let ((inhibit-read-only t)
+          (collapsible-icon (if (display-graphic-p) "▾" "-"))
+          (expandable-icon (if (display-graphic-p) "▸" "+")))
       (save-excursion
         (goto-char (point-min))
         (while (not (eobp))
@@ -823,9 +825,9 @@ This is somewhat experimental/hacky."
                 (let ((filename (dired-get-filename nil t)))
                   (if (file-directory-p filename)
                       (if (dired-subtree--is-expanded-p)
-                          (insert "- ")
-                        (insert "+ "))
-                    (insert "  "))))))
+                          (insert (concat collapsible-icon " "))
+                        (insert (concat expandable-icon " ")))
+                    (insert ""))))))
           (forward-line 1))))))
 
 (defun dired-sidebar-tui-update-with-delay (&rest _)
