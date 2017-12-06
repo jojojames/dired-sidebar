@@ -836,7 +836,8 @@ This is somewhat experimental/hacky."
      (when-let* ((buffer (dired-sidebar-sidebar-buffer-in-frame)))
        (with-current-buffer buffer
          (dired-revert)
-         (recenter))))))
+         (when dired-sidebar-recenter-cursor-on-follow-file
+           (recenter)))))))
 
 (defun dired-sidebar-tui-reset-in-sidebar (&rest _)
   "Runs `dired-sidebar-tui-dired-reset' in current `dired-sidebar' buffer."
