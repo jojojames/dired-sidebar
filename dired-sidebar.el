@@ -260,6 +260,11 @@ with a prefix arg or when `dired-sidebar-find-file-alt' is called."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-recenter-cursor-on-tui-update nil
+  "Whether or not to center cursor when updating tui interface."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 (defcustom dired-sidebar-display-autorevert-messages nil
   "Whether or not to display `autorevert' messages."
   :type 'boolean
@@ -838,7 +843,7 @@ This is somewhat experimental/hacky."
      (when-let* ((buffer (dired-sidebar-sidebar-buffer-in-frame)))
        (with-current-buffer buffer
          (dired-revert)
-         (when dired-sidebar-recenter-cursor-on-follow-file
+         (when dired-sidebar-recenter-cursor-on-tui-update
            (recenter)))))))
 
 (defun dired-sidebar-tui-reset-in-sidebar (&rest _)
