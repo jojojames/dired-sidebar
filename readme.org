@@ -144,3 +144,5 @@
   make lint
   make test
   #+end_src
+* Help Wanted
+  TUI interface is slow compared to all-the-icons version.
