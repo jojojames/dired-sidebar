@@ -103,4 +103,20 @@ already showing."
     (kill-buffer A-buffer)
     (dired-sidebar-hide-sidebar)))
 
+(ert-deftest dired-sidebar-sidebar-killed-sidebar-buffer-in-frame-returns-nil ()
+  "Test that `dired-sidebar-sidebar-buffer-in-frame' returns nil
+if the buffer has been killed. Also test alist have been cleaned up."
+  (let* ((default-directory test-data-dir-basic)
+         (A-buffer (find-file-noselect
+                    (f-join default-directory "A") t)))
+    (with-current-buffer A-buffer
+      (call-interactively 'dired-sidebar-toggle-sidebar)
+      (let ((sidebar (dired-sidebar-sidebar-buffer-in-frame)))
+        (should sidebar)
+        (should dired-sidebar-alist)
+        (kill-buffer sidebar)
+        (should (not (dired-sidebar-sidebar-buffer-in-frame)))
+        (should (not dired-sidebar-alist))))
+    (kill-buffer A-buffer)))
+
 ;;; dired-sidebar-test.el ends here

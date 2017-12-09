@@ -710,8 +710,27 @@ Return buffer if so."
     (get-buffer-window buffer)))
 
 (defun dired-sidebar-sidebar-buffer-in-frame (&optional f)
-  "Return the current sidebar buffer in F or selected frame."
-  (alist-get (or f (selected-frame)) dired-sidebar-alist))
+  "Return the current sidebar buffer in F or selected frame.
+
+This can return nil if the buffer has been killed."
+  (let* ((frame (or f (selected-frame)))
+         (buffer (alist-get frame dired-sidebar-alist)))
+    ;; The buffer can be killed for a variety of reasons.
+    ;; This side effect is kind of messy but it's the simplest place
+    ;; to put the clean up code for `dired-sidebar-alist'.
+    (if (buffer-live-p buffer)
+        buffer
+      ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Association-Lists.html
+      ;; Documentation for `assq-delete-all'.
+      ;; What kind of API is this?? :()
+      ;; Why does it only modify 'often' and not 'always'? ¯\_(ツ)_/¯
+      ;; It returns the shortened alist, and often modifies the original list
+      ;; structure of alist.
+      ;; For correct results, use the return value of assq-delete-all rather
+      ;; than looking at the saved value of alist.
+      (setq dired-sidebar-alist
+            (assq-delete-all frame dired-sidebar-alist))
+      nil)))
 
 (defun dired-sidebar-switch-to-dir (dir)
   "Update buffer with DIR as root."
