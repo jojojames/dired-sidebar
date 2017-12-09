@@ -399,13 +399,13 @@ will check if buffer is stale through `auto-revert-mode'.")
 
   (when dired-sidebar-refresh-on-projectile-switch
     (add-hook 'projectile-after-switch-project-hook
-              #'dired-sidebar-follow-file-in-project))
+              #'dired-sidebar-follow-file))
 
   (when dired-sidebar-should-follow-file
     (setq dired-sidebar-follow-file-timer
           (run-with-idle-timer
            dired-sidebar-follow-file-idle-delay
-           t #'dired-sidebar-follow-file-in-project)))
+           t #'dired-sidebar-follow-file)))
 
   (dired-unadvertise (dired-current-directory))
   (dired-sidebar-update-buffer-name)
@@ -739,13 +739,18 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
           (revert-buffer)))
     (setq dired-sidebar-check-for-stale-buffer-p t)))
 
-(defun dired-sidebar-follow-file-in-project ()
-  "Follow new file in project."
+(defun dired-sidebar-follow-file ()
+  "Follow new file.
+
+The root of the sidebar will be determined by `dired-sidebar-get-dir-to-show'
+and the file followed is will be determined by `dired-sidebar-get-file-to-show',
+
+both accounting for the currently selected window."
   (when (dired-sidebar-showing-sidebar-in-frame-p)
     ;; Wrap in `with-selected-window' because we don't want to pop to
     ;; the sidebar buffer.
-    ;; We also need to pick the correct selected-window to get the correct
-    ;; project root that we've switched to.
+    ;; We also need to pick the correct selected-window so that
+    ;; `dired-sidebar-get-dir-to-show' can get the correct root to change to.
     (with-selected-window (selected-window)
       (let ((root (dired-sidebar-get-dir-to-show)))
         (dired-sidebar-switch-to-dir root)
