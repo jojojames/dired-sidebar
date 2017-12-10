@@ -411,7 +411,8 @@ will check if buffer is stale through `auto-revert-mode'.")
          (or
           (fboundp 'all-the-icons-dired-mode)
           (autoloadp (symbol-function 'all-the-icons-dired-mode))))
-    (all-the-icons-dired-mode))
+    (with-no-warnings
+      (all-the-icons-dired-mode)))
    ((eq dired-sidebar-theme 'nerd)
     (dired-sidebar-setup-tui))
    (:default
