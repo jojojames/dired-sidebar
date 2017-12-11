@@ -555,7 +555,11 @@ window selection."
   (let ((find-file-run-dired t)
         (dired-file-name (or dir (dired-get-file-for-visit)))
         (select-with-alt-window-function current-prefix-arg))
-    (if (file-directory-p dired-file-name)
+    (if (and (file-directory-p dired-file-name)
+             ;; For "." open a full-blown dired buffer, since the directory is
+             ;; already open in the sidebar.
+             (not (string= (file-name-nondirectory dired-file-name)
+                           ".")))
         (dired-sidebar-with-no-dedication
          (let ((buf-name (dired-sidebar-sidebar-buffer-name
                           dired-file-name)))
