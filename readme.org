@@ -61,7 +61,7 @@
     (setq dired-sidebar-face '(:family "Helvetica" :height 140)))
    ((eq system-type 'windows-nt)
     (setq dired-sidebar-theme 'nerd)
-    (setq dired-sidebar-face '(:family "Times New Roman" :height 130)))
+    (setq dired-sidebar-face '(:family "Lucida Sans Unicode" :height 110)))
    (:default
     (setq dired-sidebar-theme 'nerd)
     (setq dired-sidebar-face '(:family "Arial" :height 140))))
@@ -146,4 +146,4 @@
   make test
   #+end_src
 * Help Wanted
-  TUI interface is slow compared to all-the-icons version.
+  Look at issues page! :)
