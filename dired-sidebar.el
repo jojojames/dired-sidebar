@@ -824,6 +824,9 @@ both accounting for the currently selected window."
    ((and (eq major-mode 'term-mode)
          dired-sidebar-use-term-integration)
     (dired-sidebar-term-get-pwd))
+   ((and (eq major-mode 'dired-mode)
+         (not dired-sidebar-mode))
+    (expand-file-name default-directory))
    (:default
     (dired-sidebar-sidebar-root))))
 
@@ -837,6 +840,10 @@ This may return nil if there's no suitable file to show."
          (fboundp 'magit-file-at-point)
          (magit-file-at-point))
     (expand-file-name (magit-file-at-point)))
+   ((and (eq major-mode 'dired-mode)
+         (not dired-sidebar-mode))
+    ;; Not sure if `dired-get-filename' is more appropriate.
+    (dired-get-file-for-visit))
    (:default
     buffer-file-name)))
 
