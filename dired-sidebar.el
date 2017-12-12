@@ -291,6 +291,11 @@ with a prefix arg or when `dired-sidebar-find-file-alt' is called."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-open-file-in-most-recently-used-window t
+  "Whether or not to open files in most recently used window."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 ;; Internal
 
 (defvar dired-sidebar-alist '()
@@ -580,7 +585,9 @@ window selection."
       (select-window
        (if select-with-alt-window-function
            (funcall dired-sidebar-alternate-select-window-function)
-         (next-window)))
+         (if dired-sidebar-open-file-in-most-recently-used-window
+             (get-mru-window)
+           (next-window))))
       (find-file dired-file-name))))
 
 (defun dired-sidebar-find-file-alt ()
