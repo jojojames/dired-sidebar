@@ -843,7 +843,9 @@ This may return nil if there's no suitable file to show."
    ((and (eq major-mode 'dired-mode)
          (not dired-sidebar-mode))
     ;; Not sure if `dired-get-filename' is more appropriate.
-    (dired-get-file-for-visit))
+    (condition-case nil
+        (dired-get-file-for-visit)
+      (error nil)))
    (:default
     buffer-file-name)))
 
