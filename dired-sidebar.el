@@ -834,6 +834,17 @@ both accounting for the currently selected window."
    ((and (eq major-mode 'dired-mode)
          (not dired-sidebar-mode))
     (expand-file-name default-directory))
+   ((and (eq major-mode 'ibuffer-mode)
+         (ibuffer-current-buffer))
+    (let ((buffer-at-point (ibuffer-current-buffer)))
+      (if (fboundp 'ibuffer-projectile-root)
+          (if-let* ((ibuffer-projectile-root
+                     (ibuffer-projectile-root buffer-at-point)))
+              (cdr ibuffer-projectile-root)
+            (with-current-buffer buffer-at-point
+              default-directory))
+        (with-current-buffer buffer-at-point
+          default-directory))))
    (:default
     (dired-sidebar-sidebar-root))))
 
@@ -853,6 +864,8 @@ This may return nil if there's no suitable file to show."
     (condition-case nil
         (dired-get-file-for-visit)
       (error nil)))
+   ((eq major-mode 'ibuffer-mode)
+    (buffer-file-name (ibuffer-current-buffer)))
    (:default
     buffer-file-name)))
 
