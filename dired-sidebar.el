@@ -246,10 +246,7 @@ Warning: This is implemented by advising specific dired functions."
     dired-do-flagged-delete
     dired-create-directory
     delete-file
-    (save-buffer . 5)
-    (evil-write . 5)
-    (evil-write-all . 5)
-    (evil-save . 5))
+    (save-buffer . 5))
   "A list of commands that will trigger a refresh of the sidebar.
 
 The command can be an alist with the CDR of the alist being the amount of time
