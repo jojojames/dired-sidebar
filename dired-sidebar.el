@@ -258,7 +258,7 @@ to disable automatic refresh when a special command is triggered."
   :group 'dired-sidebar)
 
 (make-obsolete-variable 'dired-sidebar-refresh-on-special-command-instantly
-                        'dired-sidebar-theme "2017/12/14")
+                        'dired-sidebar-special-refresh-commands "2017/12/14")
 
 (defcustom dired-sidebar-refresh-on-special-command-instantly t
   "Whether or not to revert buffer when special command is called.
