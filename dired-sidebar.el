@@ -245,7 +245,7 @@ Warning: This is implemented by advising specific dired functions."
     dired-do-copy
     dired-do-flagged-delete
     dired-create-directory
-    delete-file
+    (delete-file . 5)
     (save-buffer . 5))
   "A list of commands that will trigger a refresh of the sidebar.
 
