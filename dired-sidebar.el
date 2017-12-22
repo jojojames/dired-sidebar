@@ -821,7 +821,8 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
   "Refresh sidebar buffer."
   (when-let* ((sidebar (dired-sidebar-sidebar-buffer-in-frame)))
     (with-current-buffer sidebar
-      (revert-buffer))))
+      (let ((auto-revert-verbose nil))
+        (revert-buffer)))))
 
 (defun dired-sidebar-follow-file ()
   "Follow new file.
