@@ -119,4 +119,15 @@ if the buffer has been killed. Also test alist have been cleaned up."
         (should (not dired-sidebar-alist))))
     (kill-buffer A-buffer)))
 
+(ert-deftest dired-sidebar-get-file-to-show-returns-nil-for-unsaved-buffers ()
+  "Test that `dired-sidebar-get-file-to-show' doesn't return a file when the
+buffer hasn't been saved yet."
+  (let* ((default-directory test-data-dir-basic)
+         (unsaved-buffer
+          (find-file-noselect
+           (f-join default-directory "new-unsaved-file") t)))
+    (with-current-buffer unsaved-buffer
+      (should (not (dired-sidebar-get-file-to-show))))
+    (kill-buffer unsaved-buffer)))
+
 ;;; dired-sidebar-test.el ends here
