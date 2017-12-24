@@ -896,9 +896,9 @@ This may return nil if there's no suitable file to show."
    ((and (eq major-mode 'ibuffer-mode)
          (fboundp 'ibuffer-current-buffer))
     (let ((bf-name (buffer-file-name (ibuffer-current-buffer))))
-      (and (file-exists-p bf-name) bf-name)))
+      (and bf-name (file-exists-p bf-name) bf-name)))
    (:default
-    (and (file-exists-p buffer-file-name) buffer-file-name))))
+    (and buffer-file-name (file-exists-p buffer-file-name) buffer-file-name))))
 
 (defun dired-sidebar-term-get-pwd ()
   "Get current directory of `term-mode'.
