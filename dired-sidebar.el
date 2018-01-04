@@ -257,22 +257,6 @@ to disable automatic refresh when a special command is triggered."
   :type 'list
   :group 'dired-sidebar)
 
-(make-obsolete-variable 'dired-sidebar-refresh-on-special-command-instantly
-                        'dired-sidebar-special-refresh-commands "2017/12/14")
-
-(defcustom dired-sidebar-refresh-on-special-command-instantly t
-  "Whether or not to revert buffer when special command is called.
-
-Special command is a command from `dired-sidebar-special-refresh-commands'.
-
-Keeping this as true will make those special commands update the UI instantly
-at the cost of *possibly* some extra delay.
-
-This is deprecated and unused. Modify `dired-sidebar-special-refresh-commands'
-instead. This will be removed early 2018."
-  :type 'boolean
-  :group 'dired-sidebar)
-
 (defcustom dired-sidebar-alternate-select-window-function
   #'dired-sidebar-default-alternate-select-window
   "Function to call when using alternative window selection.
