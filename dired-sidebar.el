@@ -337,6 +337,15 @@ will check if buffer is stale through `auto-revert-mode'.")
   ;; Match backgrounds.
   (setq-local dired-subtree-use-backgrounds nil)
 
+  ;; https://github.com/jojojames/dired-sidebar/issues/7
+  ;; Symlinks are displayed incorrectly when these three things happen.
+  ;; 1. `dired-hide-details-mode' is on.
+  ;; 2. `dired-subtree' toggles a symlink folder via `dired-subtree-toggle'.
+  ;; 3. `dired-hide-details-hide-symlink-targets' is set to true.
+  ;; Since we use both 1 & 2, disable 3 to avoid the issue.
+  ;; This needs to be set to nil before `dired-hide-details-mode' is called.
+  (setq-local dired-hide-details-hide-symlink-targets nil)
+
   ;; We don't want extra details in the sidebar.
   (dired-hide-details-mode)
 
