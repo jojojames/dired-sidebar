@@ -788,6 +788,7 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
   (when-let* ((sidebar (dired-sidebar-sidebar-buffer-in-frame)))
     (with-current-buffer sidebar
       (let ((auto-revert-verbose nil))
+        (ignore auto-revert-verbose) ;; Make byte compiler happy.
         (revert-buffer)))))
 
 (defun dired-sidebar-follow-file ()
