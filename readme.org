@@ -51,6 +51,7 @@
   :ensure t
   :commands (dired-sidebar-toggle-sidebar)
   :config
+  (setq dired-sidebar-subtree-line-prefix " .")
   (cond
    ((eq system-type 'darwin)
     (if (display-graphic-p)

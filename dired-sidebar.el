@@ -261,6 +261,11 @@ with a prefix arg or when `dired-sidebar-find-file-alt' is called."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-subtree-line-prefix dired-subtree-line-prefix
+  "The line prefix to use when subtree is cycled."
+  :type 'string
+  :group 'dired-sidebar)
+
 ;; Internal
 
 (defvar dired-sidebar-alist '()
@@ -337,6 +342,9 @@ will check if buffer is stale through `auto-revert-mode'.")
 
   ;; Match backgrounds.
   (setq-local dired-subtree-use-backgrounds nil)
+
+  ;; `dired-subtree''s line prefix is determined by `dired-sidebar'.
+  (setq-local dired-subtree-line-prefix dired-sidebar-subtree-line-prefix)
 
   ;; https://github.com/jojojames/dired-sidebar/issues/7
   ;; Symlinks are displayed incorrectly when these three things happen.
