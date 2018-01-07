@@ -48,6 +48,7 @@
 (eval-when-compile (require 'subr-x))
 
 ;; Compatibility
+
 (eval-and-compile
   (when (version< emacs-version "26")
     (with-no-warnings
