@@ -5,14 +5,12 @@
 
 * Screenshots
   With All The Icons
-  [[./screenshots/with_dired_subtree.png]]
+  [[./screenshots/one.png]]
 
   With Arrows
   [[./screenshots/arrows.png]]
 
   With Text UI
-  #+CAPTION: Text User Interface
-  #+NAME: With Text UI
   [[./screenshots/tui.png]]
 
 * Installation
