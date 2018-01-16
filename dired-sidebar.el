@@ -554,6 +554,17 @@ This is dependent on `dired-subtree-cycle'."
     (delete-window (get-buffer-window buffer))
     (dired-sidebar-update-state nil)))
 
+;;;###autoload
+(defun dired-sidebar-jump-to-sidebar ()
+  "Jump to `dired-sidebar' buffer if it is showing.
+
+If it's not showing, act as `dired-sidebar-toggle-sidebar'."
+  (interactive)
+  (if (dired-sidebar-showing-sidebar-p)
+      (select-window
+       (get-buffer-window (dired-sidebar-buffer (selected-frame))))
+    (call-interactively #'dired-sidebar-toggle-sidebar)))
+
 (defun dired-sidebar-find-file (&optional dir)
   "Wrapper over `dired-find-file'.
 Optional argument DIR Fine file using DIR of available.
