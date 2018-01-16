@@ -35,7 +35,7 @@ already showing."
                     (f-join default-directory "A") t)))
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
-      (should (dired-sidebar-sidebar-buffer)))
+      (should (dired-sidebar-buffer)))
     (kill-buffer A-buffer)
     (dired-sidebar-hide-sidebar)))
 
@@ -47,9 +47,9 @@ already showing."
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (should (equal (current-buffer)
-                     (dired-sidebar-sidebar-buffer))))
+                     (dired-sidebar-buffer))))
     (call-interactively 'dired-sidebar-hide-sidebar)
-    (should (equal (dired-sidebar-sidebar-buffer) nil))
+    (should (equal (dired-sidebar-buffer) nil))
     (kill-buffer A-buffer)))
 
 (ert-deftest dired-sidebar-pop-to-sidebar-on-toggle-open ()
@@ -61,7 +61,7 @@ already showing."
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (should (equal (current-buffer)
-                     (dired-sidebar-sidebar-buffer))))
+                     (dired-sidebar-buffer))))
     (call-interactively 'dired-sidebar-hide-sidebar)
     (with-current-buffer A-buffer
       (let ((dired-sidebar-pop-to-sidebar-on-toggle-open nil))
@@ -104,18 +104,18 @@ already showing."
     (dired-sidebar-hide-sidebar)))
 
 (ert-deftest dired-sidebar-sidebar-killed-sidebar-buffer-in-frame-returns-nil ()
-  "Test that `dired-sidebar-sidebar-buffer' returns nil
+  "Test that `dired-sidebar-buffer' returns nil
 if the buffer has been killed. Also test alist have been cleaned up."
   (let* ((default-directory test-data-dir-basic)
          (A-buffer (find-file-noselect
                     (f-join default-directory "A") t)))
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
-      (let ((sidebar (dired-sidebar-sidebar-buffer)))
+      (let ((sidebar (dired-sidebar-buffer)))
         (should sidebar)
         (should dired-sidebar-alist)
         (kill-buffer sidebar)
-        (should (not (dired-sidebar-sidebar-buffer)))
+        (should (not (dired-sidebar-buffer)))
         (should (not dired-sidebar-alist))))
     (kill-buffer A-buffer)))
 

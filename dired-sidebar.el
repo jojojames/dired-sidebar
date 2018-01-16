@@ -471,7 +471,7 @@ With universal argument, use current directory."
             (with-selected-window (selected-window)
               (dired-sidebar-point-at-file file-to-show dir-to-show)))
         (when dired-sidebar-pop-to-sidebar-on-toggle-open
-          (pop-to-buffer (dired-sidebar-sidebar-buffer)))))))
+          (pop-to-buffer (dired-sidebar-buffer)))))))
 
 (defun dired-sidebar-point-at-file (name root)
   "Try to point at NAME from sidebar.
@@ -480,7 +480,7 @@ Keep `dired' pointed at ROOT while cycling directories until
 NAME is found in ROOT path.
 
 This is dependent on `dired-subtree-cycle'."
-  (let ((sidebar (dired-sidebar-sidebar-buffer)))
+  (let ((sidebar (dired-sidebar-buffer)))
     (pop-to-buffer sidebar)
     (when (and name
                (fboundp 'dired-subtree-cycle)
@@ -550,7 +550,7 @@ This is dependent on `dired-subtree-cycle'."
 (defun dired-sidebar-hide-sidebar ()
   "Hide the sidebar in the selected frame."
   (interactive)
-  (when-let* ((buffer (dired-sidebar-sidebar-buffer)))
+  (when-let* ((buffer (dired-sidebar-buffer)))
     (delete-window (get-buffer-window buffer))
     (dired-sidebar-update-state nil)))
 
@@ -570,7 +570,7 @@ window selection."
              (not (string= (file-name-nondirectory dired-file-name)
                            ".")))
         (dired-sidebar-with-no-dedication
-         (let ((buf-name (dired-sidebar-sidebar-buffer-name
+         (let ((buf-name (dired-sidebar-buffer-name
                           dired-file-name)))
            (if (dired-sidebar-buffer-exists-p buf-name)
                (progn
@@ -585,7 +585,7 @@ window selection."
       ;; This is useful for when `dired-sidebar-find-file' is called
       ;; from a buffer that is not already in the sidebar buffer.
       ;; e.g. A mouse click event.
-      (switch-to-buffer (dired-sidebar-sidebar-buffer))
+      (switch-to-buffer (dired-sidebar-buffer))
       (select-window
        (if select-with-alt-window-function
            (funcall dired-sidebar-alternate-select-window-function)
@@ -612,7 +612,7 @@ Select alternate window using `dired-sidebar-alternate-select-window-function'."
    (goto-char (point-min))
    (let* ((dir (dired-current-directory))
           (up (file-name-directory (directory-file-name dir)))
-          (up-name (dired-sidebar-sidebar-buffer-name up)))
+          (up-name (dired-sidebar-buffer-name up)))
      (if (dired-sidebar-buffer-exists-p up-name)
          (progn
            (switch-to-buffer up-name)
@@ -669,7 +669,7 @@ the relevant file-directory clicked on by the mouse."
         default-directory)
     (error default-directory)))
 
-(defun dired-sidebar-sidebar-buffer-name (dir)
+(defun dired-sidebar-buffer-name (dir)
   "Return name of `dired-sidebar' buffer given DIR."
   (let ((b (cond
             ((string-suffix-p ".." dir)
@@ -684,7 +684,7 @@ the relevant file-directory clicked on by the mouse."
 (defun dired-sidebar-get-or-create-buffer (root)
   "Get or create a `dired-sidebar' buffer matching ROOT."
   (interactive)
-  (let ((name (dired-sidebar-sidebar-buffer-name root)))
+  (let ((name (dired-sidebar-buffer-name root)))
     (if-let* ((existing-buffer (get-buffer name)))
         existing-buffer
       (let ((buffer (dired-noselect root)))
@@ -732,7 +732,7 @@ Set font to a variable width (proportional) in the current buffer."
 (defun dired-sidebar-update-buffer-name ()
   "Change buffer name to avoid collision with regular `dired' buffers."
   (rename-buffer
-   (dired-sidebar-sidebar-buffer-name (dired-current-directory))))
+   (dired-sidebar-buffer-name (dired-current-directory))))
 
 (defun dired-sidebar-update-state (buffer &optional f)
   "Update current state with BUFFER for sidebar in F or selected frame."
@@ -748,10 +748,10 @@ Check if F or selected frame contains a sidebar and return
 corresponding buffer if buffer has a window attached to it.
 
 Return buffer if so."
-  (when-let* ((buffer (dired-sidebar-sidebar-buffer f)))
+  (when-let* ((buffer (dired-sidebar-buffer f)))
     (get-buffer-window buffer)))
 
-(defun dired-sidebar-sidebar-buffer (&optional f)
+(defun dired-sidebar-buffer (&optional f)
   "Return the current sidebar buffer in F or selected frame.
 
 This can return nil if the buffer has been killed."
@@ -794,7 +794,7 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 
 (defun dired-sidebar-refresh-buffer (&rest _)
   "Refresh sidebar buffer."
-  (when-let* ((sidebar (dired-sidebar-sidebar-buffer)))
+  (when-let* ((sidebar (dired-sidebar-buffer)))
     (with-current-buffer sidebar
       (let ((auto-revert-verbose nil))
         (ignore auto-revert-verbose) ;; Make byte compiler happy.
@@ -931,7 +931,7 @@ This is somewhat experimental/hacky."
   (run-with-idle-timer
    dired-sidebar-tui-update-delay nil
    (lambda ()
-     (when-let* ((buffer (dired-sidebar-sidebar-buffer)))
+     (when-let* ((buffer (dired-sidebar-buffer)))
        (with-current-buffer buffer
          (dired-revert)
          (when dired-sidebar-recenter-cursor-on-tui-update
@@ -939,7 +939,7 @@ This is somewhat experimental/hacky."
 
 (defun dired-sidebar-tui-reset-in-sidebar (&rest _)
   "Runs `dired-sidebar-tui-dired-reset' in current `dired-sidebar' buffer."
-  (when-let* ((buffer (dired-sidebar-sidebar-buffer)))
+  (when-let* ((buffer (dired-sidebar-buffer)))
     (with-current-buffer buffer
       (dired-sidebar-tui-dired-reset))))
 
