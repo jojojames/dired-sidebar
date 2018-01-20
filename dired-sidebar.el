@@ -221,7 +221,8 @@ Warning: This is implemented by advising specific dired functions."
     dired-do-flagged-delete
     dired-create-directory
     (delete-file . 5)
-    (save-buffer . 5))
+    (save-buffer . 5)
+    magit-format-patch)
   "A list of commands that will trigger a refresh of the sidebar.
 
 The command can be an alist with the CDR of the alist being the amount of time
