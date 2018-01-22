@@ -50,12 +50,15 @@
 ;; Compatibility
 
 (eval-and-compile
-  (when (version< emacs-version "26")
-    (with-no-warnings
-      (defalias 'if-let* #'if-let)
-      (defalias 'when-let* #'when-let)
-      (function-put #'if-let* 'lisp-indent-function 2)
-      (function-put #'when-let* 'lisp-indent-function 1))))
+  (with-no-warnings
+    (if (version< emacs-version "26")
+        (progn
+          (defalias 'dired-sidebar-if-let* #'if-let)
+          (defalias 'dired-sidebar-when-let* #'when-let)
+          (function-put #'flycheck-xcode-if-let* 'lisp-indent-function 2)
+          (function-put #'flycheck-xcode-when-let* 'lisp-indent-function 1))
+      (defalias 'dired-sidebar-if-let* #'if-let*)
+      (defalias 'dired-sidebar-when-let* #'when-let*))))
 
 ;; Customizations
 
@@ -552,7 +555,7 @@ This is dependent on `dired-subtree-cycle'."
 (defun dired-sidebar-hide-sidebar ()
   "Hide the sidebar in the selected frame."
   (interactive)
-  (when-let* ((buffer (dired-sidebar-buffer)))
+  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer)))
     (delete-window (get-buffer-window buffer))
     (dired-sidebar-update-state nil)))
 
@@ -698,7 +701,7 @@ the relevant file-directory clicked on by the mouse."
   "Get or create a `dired-sidebar' buffer matching ROOT."
   (interactive)
   (let ((name (dired-sidebar-buffer-name root)))
-    (if-let* ((existing-buffer (get-buffer name)))
+    (dired-sidebar-if-let* ((existing-buffer (get-buffer name)))
         existing-buffer
       (let ((buffer (dired-noselect root)))
         ;; When opening a sidebar while in a dired buffer that matches
@@ -761,7 +764,7 @@ Check if F or selected frame contains a sidebar and return
 corresponding buffer if buffer has a window attached to it.
 
 Return buffer if so."
-  (when-let* ((buffer (dired-sidebar-buffer f)))
+  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer f)))
     (get-buffer-window buffer)))
 
 (defun dired-sidebar-buffer (&optional f)
@@ -807,7 +810,7 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 
 (defun dired-sidebar-refresh-buffer (&rest _)
   "Refresh sidebar buffer."
-  (when-let* ((sidebar (dired-sidebar-buffer)))
+  (dired-sidebar-when-let* ((sidebar (dired-sidebar-buffer)))
     (with-current-buffer sidebar
       (let ((auto-revert-verbose nil))
         (ignore auto-revert-verbose) ;; Make byte compiler happy.
@@ -829,7 +832,7 @@ both accounting for the currently selected window."
       (let ((root (dired-sidebar-get-dir-to-show)))
         (dired-sidebar-switch-to-dir root)
         (when dired-sidebar-follow-file-at-point-on-toggle-open
-          (when-let* ((file (dired-sidebar-get-file-to-show)))
+          (dired-sidebar-when-let* ((file (dired-sidebar-get-file-to-show)))
             (dired-sidebar-point-at-file file root)))))))
 
 (defun dired-sidebar-default-alternate-select-window ()
@@ -856,8 +859,8 @@ both accounting for the currently selected window."
          (ibuffer-current-buffer))
     (let ((buffer-at-point (ibuffer-current-buffer)))
       (if (fboundp 'ibuffer-projectile-root)
-          (if-let* ((ibuffer-projectile-root
-                     (ibuffer-projectile-root buffer-at-point)))
+          (dired-sidebar-if-let* ((ibuffer-projectile-root
+                                   (ibuffer-projectile-root buffer-at-point)))
               (cdr ibuffer-projectile-root)
             (with-current-buffer buffer-at-point
               default-directory))
@@ -944,7 +947,7 @@ This is somewhat experimental/hacky."
   (run-with-idle-timer
    dired-sidebar-tui-update-delay nil
    (lambda ()
-     (when-let* ((buffer (dired-sidebar-buffer)))
+     (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer)))
        (with-current-buffer buffer
          (dired-revert)
          (when dired-sidebar-recenter-cursor-on-tui-update
@@ -952,7 +955,7 @@ This is somewhat experimental/hacky."
 
 (defun dired-sidebar-tui-reset-in-sidebar (&rest _)
   "Runs `dired-sidebar-tui-dired-reset' in current `dired-sidebar' buffer."
-  (when-let* ((buffer (dired-sidebar-buffer)))
+  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer)))
     (with-current-buffer buffer
       (dired-sidebar-tui-dired-reset))))
 
