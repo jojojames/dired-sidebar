@@ -300,6 +300,7 @@ will check if buffer is stale through `auto-revert-mode'.")
 (defvar dired-sidebar-mode-map
   (let ((map (make-sparse-keymap)))
     (when (fboundp 'dired-subtree-toggle)
+      (define-key map (kbd "TAB") 'dired-subtree-toggle)
       (define-key map [tab] 'dired-subtree-toggle))
     (define-key map (kbd "C-m") 'dired-sidebar-find-file)
     (define-key map (kbd "RET") 'dired-sidebar-find-file)
