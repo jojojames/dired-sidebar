@@ -55,8 +55,8 @@
         (progn
           (defalias 'dired-sidebar-if-let* #'if-let)
           (defalias 'dired-sidebar-when-let* #'when-let)
-          (function-put #'flycheck-xcode-if-let* 'lisp-indent-function 2)
-          (function-put #'flycheck-xcode-when-let* 'lisp-indent-function 1))
+          (function-put #'dired-sidebar-if-let* 'lisp-indent-function 2)
+          (function-put #'dired-sidebar-when-let* 'lisp-indent-function 1))
       (defalias 'dired-sidebar-if-let* #'if-let*)
       (defalias 'dired-sidebar-when-let* #'when-let*))))
 
