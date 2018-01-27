@@ -75,6 +75,17 @@
   #+end_src
 
   For configuration, I recommend looking at the defcustoms in ~dired-sidebar.el~.
+
+  Sidebar can also be toggled together with [[https://github.com/jojojames/ibuffer-sidebar][ibuffer-sidebar]].
+
+  #+begin_src emacs-lisp :tangle yes
+    (defun +sidebar-toggle ()
+      "Toggle both `dired-sidebar' and `ibuffer-sidebar'."
+      (interactive)
+      (dired-sidebar-toggle-sidebar)
+      (ibuffer-sidebar-toggle-sidebar))
+  #+end_src
+
 * Features
 ** Dired
    As a result of using ~dired~ as a base, many features and functionality already
