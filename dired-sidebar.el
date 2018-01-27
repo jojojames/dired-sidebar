@@ -270,6 +270,13 @@ with a prefix arg or when `dired-sidebar-find-file-alt' is called."
   :type 'string
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-display-alist '((side . left) (slot . -1))
+  "Alist used in `display-buffer-in-side-window'.
+
+e.g. (display-buffer-in-side-window buffer '((side . left) (slot . -1)))"
+  :type 'alist
+  :group 'dired-sidebar)
+
 ;; Internal
 
 (defvar dired-sidebar-alist '()
@@ -539,7 +546,7 @@ This is dependent on `dired-subtree-cycle'."
                     ;; Only expect this to be hit when called interactively.
                     (dired-sidebar-get-or-create-buffer
                      (dired-sidebar-get-dir-to-show)))))
-    (display-buffer-in-side-window buffer '((side . left)))
+    (display-buffer-in-side-window buffer dired-sidebar-display-alist)
     (let ((window (get-buffer-window buffer)))
       (set-window-dedicated-p window t)
       (with-selected-window window
