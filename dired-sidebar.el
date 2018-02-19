@@ -513,12 +513,24 @@ This is dependent on `dired-subtree-cycle'."
                 ;; file. If that fails, just search for the text.
                 (let ((default-directory (file-name-directory path)))
                   (unless (dired-goto-file path)
-                    ;; It's hard to get this right so just using a
-                    ;; heuristic will get 90% of the way there.
-                    ;; Making sure there's a space in front of the name
-                    ;; skips matches that contains the name as a
-                    ;; substring which is probably good enough...
-                    (re-search-forward path-regex)))
+                    (condition-case nil
+                        ;; It's hard to get this right so just using a
+                        ;; heuristic will get 90% of the way there.
+                        ;; Making sure there's a space in front of the name
+                        ;; skips matches that contains the name as a
+                        ;; substring which is probably good enough...
+                        (re-search-forward path-regex)
+                      ;; Sometimes `dired' gets out of sync with the file.
+                      ;; Refresh the buffer and try the search again.
+                      ;; One way to reproduce this:
+                      ;; 1. Open file A as buffer B.
+                      ;; 2. Delete file A in `dired'.
+                      ;; 3. Hide `dired-sidebar'.
+                      ;; 4. Save buffer B.
+                      ;; 5. Re-open `dired-sidebar'.
+                      (error
+                       (revert-buffer)
+                       (re-search-forward path-regex nil :no-error)))))
               (re-search-forward path-regex)
               ;; Check if subtree has already been expanded.
               ;; Basically, we're using `dired-subtree-cycle' more
