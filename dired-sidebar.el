@@ -506,28 +506,28 @@ This is dependent on `dired-subtree-cycle'."
              ;; This will return a list of '\("a" "b" "c"\).
              (dirs (split-string (cadr (split-string name root)) "/")))
         (dolist (dir dirs)
-          (setq path (concat path dir))
-          (if (file-regular-p path)
-              ;; Try to use `dired-goto-file' to go to the correct
-              ;; file. If that fails, just search for the text.
-              (let ((default-directory (file-name-directory path)))
-                (unless (dired-goto-file path)
-                  ;; It's hard to get this right so just using a
-                  ;; heuristic will get 90% of the way there.
-                  ;; Making sure there's a space in front of the name
-                  ;; skips matches that contains the name as a
-                  ;; substring which is probably good enough...
-                  (re-search-forward (concat "^.*[[:space:]]"
-                                             (regexp-quote dir)))))
-            (re-search-forward (concat "^.*[[:space:]]" (regexp-quote dir)))
-            ;; Check if subtree has already been expanded.
-            ;; Basically, we're using `dired-subtree-cycle' more
-            ;; like dired-subtree-expand.
-            (when (not (dired-subtree--is-expanded-p))
-              ;; This will probably throw an error when trying to expand
-              ;; directories that have been collapsed by `dired-collapse'.
-              (dired-subtree-cycle))
-            (setq path (concat path "/")))))
+          (let ((path-regex (concat "^.*[[:space:]]" (regexp-quote dir))))
+            (setq path (concat path dir))
+            (if (file-regular-p path)
+                ;; Try to use `dired-goto-file' to go to the correct
+                ;; file. If that fails, just search for the text.
+                (let ((default-directory (file-name-directory path)))
+                  (unless (dired-goto-file path)
+                    ;; It's hard to get this right so just using a
+                    ;; heuristic will get 90% of the way there.
+                    ;; Making sure there's a space in front of the name
+                    ;; skips matches that contains the name as a
+                    ;; substring which is probably good enough...
+                    (re-search-forward path-regex)))
+              (re-search-forward path-regex)
+              ;; Check if subtree has already been expanded.
+              ;; Basically, we're using `dired-subtree-cycle' more
+              ;; like dired-subtree-expand.
+              (when (not (dired-subtree--is-expanded-p))
+                ;; This will probably throw an error when trying to expand
+                ;; directories that have been collapsed by `dired-collapse'.
+                (dired-subtree-cycle))
+              (setq path (concat path "/"))))))
       (when dired-sidebar-recenter-cursor-on-follow-file
         (recenter nil)))))
 
