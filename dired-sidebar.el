@@ -355,15 +355,15 @@ will check if buffer is stale through `auto-revert-mode'.")
   ;; `dired-remember-hidden' in Emacs 25 (terminal?) seems to throw
   ;; an error upon calling `goto-char'.
   (when (<= emacs-major-version 25)
-    (defun dired-remember-hidden-hack (f &rest args)
+    (defun dired-sidebar-remember-hidden-hack (f &rest args)
       "Return nil for `dired-remember-hidden'.
 
 Works around marker pointing to wrong buffer in Emacs 25."
       (if (bound-and-true-p dired-sidebar-mode)
           nil
         (apply f args)))
-    (advice-remove 'dired-remember-hidden 'dired-remember-hidden-hack)
-    (advice-add 'dired-remember-hidden :around 'dired-remember-hidden-hack))
+    (advice-remove 'dired-remember-hidden 'dired-sidebar-remember-hidden-hack)
+    (advice-add 'dired-remember-hidden :around 'dired-sidebar-remember-hidden-hack))
 
   (setq window-size-fixed 'width)
 
