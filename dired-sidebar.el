@@ -945,18 +945,22 @@ This may return nil if there's no suitable file to show."
 
 This is somewhat experimental/hacky."
   (interactive)
-  (forward-paragraph)
-  (when (fboundp 'term-previous-prompt)
-    (term-previous-prompt 1))
-  (when (fboundp 'term-simple-send)
-    (term-simple-send (get-buffer-process (current-buffer)) "pwd"))
-  (sleep-for 0 50)
-  (forward-line 1)
-  (let ((result (string-trim (thing-at-point 'line))))
-    (kill-whole-line)
-    (forward-line -1)
-    (kill-whole-line)
-    result))
+  (condition-case nil
+      (progn
+        (forward-paragraph)
+        (when (fboundp 'term-previous-prompt)
+          (term-previous-prompt 1))
+        (when (fboundp 'term-simple-send)
+          (term-simple-send (get-buffer-process (current-buffer)) "pwd"))
+        (sleep-for 0 50)
+        (forward-line 1)
+        (let ((result (string-trim (thing-at-point 'line))))
+          (kill-whole-line)
+          (forward-line -1)
+          (kill-whole-line)
+          result))
+      (error
+       default-directory)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
