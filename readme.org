@@ -93,7 +93,7 @@
    be familiar with. Because of this ~dired-sidebar~'s codebase can stay small and lean,
    serving as the glue to several different packages.
 ** Fast
-   Having used the [[*Alternatives][alternatives]] listed below, in my opinion,
+   Having used the [[#alternatives][alternatives]] listed below, in my opinion,
    ~dired-sidebar~ is the fastest of the bunch.
 
    Trying to open and navigate in emacs/src/lisp (or another directory I've forgotten)
