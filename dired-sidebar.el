@@ -238,6 +238,19 @@ to disable automatic refresh when a special command is triggered."
   :type 'list
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-toggle-hidden-commands
+  '(balance-windows)
+  "A list of commands that won't work when `dired-sidebar' is visible.
+
+When the command is triggered, `dired-sidebar' will hide temporarily until
+command is completed.
+
+This functionality is implemented using advice.
+
+Set this to nil to disable this advice."
+  :type 'list
+  :group 'dired-sidebar)
+
 (defcustom dired-sidebar-alternate-select-window-function
   #'dired-sidebar-default-alternate-select-window
   "Function to call when using alternative window selection.
@@ -446,6 +459,12 @@ Works around marker pointing to wrong buffer in Emacs 25."
                        #'dired-sidebar-refresh-buffer))))))))
          (advice-add x :after #'dired-sidebar-refresh-buffer)))
      dired-sidebar-special-refresh-commands))
+
+  (when dired-sidebar-toggle-hidden-commands
+    (mapc
+     (lambda (x)
+       (advice-add x :around #'dired-sidebar-advice-hide-temporarily))
+     dired-sidebar-toggle-hidden-commands))
 
   (cond
    ((and (eq dired-sidebar-theme 'icons)
@@ -965,6 +984,17 @@ This is somewhat experimental/hacky."
     ;; Refresh `all-the-icons-dired'.
     (dired-revert)
     (all-the-icons-dired--display)))
+
+(defun dired-sidebar-advice-hide-temporarily (f &rest args)
+  "A function meant to be used with advice to temporarily hide itself.
+
+This function hides the sidebar before executing F and then reshows itself after."
+  (if (not (dired-sidebar-showing-sidebar-p))
+      (apply f args)
+    (let ((sidebar (dired-sidebar-buffer)))
+      (dired-sidebar-hide-sidebar)
+      (apply f args)
+      (dired-sidebar-show-sidebar sidebar))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
