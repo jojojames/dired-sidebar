@@ -398,9 +398,10 @@ Works around marker pointing to wrong buffer in Emacs 25."
   (dired-hide-details-mode)
 
   (when (and dired-sidebar-disable-dired-collapse
-             (fboundp 'dired-collapse-mode)
-             (bound-and-true-p dired-collapse-mode))
-    (dired-collapse-mode -1))
+             (fboundp 'dired-collapse-mode))
+    (add-hook 'dired-mode-hook
+              (lambda ()
+                (dired-collapse-mode -1)) :append :local))
 
   (when (and
          (not dired-sidebar-display-autorevert-messages)
