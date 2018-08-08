@@ -176,6 +176,11 @@ Look at `dired-sidebar-term-get-pwd' for implementation."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-use-wdired-integration t
+  "Whether to integrate with `wdired'."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 (defcustom dired-sidebar-cycle-subtree-on-click t
   "Whether to cycle subtree on click."
   :type 'boolean
@@ -376,6 +381,18 @@ Works around marker pointing to wrong buffer in Emacs 25."
         (apply f args)))
     (advice-remove 'dired-remember-hidden 'dired-sidebar-remember-hidden-hack)
     (advice-add 'dired-remember-hidden :around 'dired-sidebar-remember-hidden-hack))
+
+  ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=32392
+  (when dired-sidebar-use-wdired-integration
+    (advice-remove 'wdired-change-to-dired-mode
+                   'dired-sidebar-wdired-change-to-dired-mode-advice)
+    (advice-remove 'wdired-change-to-wdired-mode
+                   'dired-sidebar-wdired-change-to-wdired-mode-advice)
+
+    (advice-add 'wdired-change-to-dired-mode
+                :around 'dired-sidebar-wdired-change-to-dired-mode-advice)
+    (advice-add 'wdired-change-to-wdired-mode
+                :around 'dired-sidebar-wdired-change-to-wdired-mode-advice))
 
   (setq window-size-fixed 'width)
 
@@ -1053,6 +1070,50 @@ e.g. + and -."
   (dired-revert))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;; `wdired' Hack ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=32392
+(defvar-local dired-sidebar-wdired-tracking-major-mode nil
+  "Track current `major-mode' when toggling to `wdired'.")
+
+(defun dired-sidebar-wdired-change-to-dired-mode-advice (f &rest args)
+  "Advice for `wdired-change-to-dired-mode'."
+  (if (eq dired-sidebar-wdired-tracking-major-mode 'dired-sidebar-mode)
+      (dired-sidebar-wdired-change-to-dired-mode)
+    (apply f args)))
+
+(defun dired-sidebar-wdired-change-to-dired-mode ()
+  "Change the mode back to dired-sidebar.
+
+This is an exact copy of `wdired-change-to-dired-mode' but changes the
+`major-mode' to `dired-sidebar-mode' instead of `dired-mode'."
+  (let ((inhibit-read-only t))
+    (remove-text-properties
+     (point-min) (point-max)
+     '(front-sticky nil rear-nonsticky nil read-only nil keymap nil)))
+  (use-local-map dired-mode-map)
+  (force-mode-line-update)
+  (setq buffer-read-only t)
+  (setq major-mode 'dired-sidebar-mode)
+  (setq mode-name "Dired-sidebar")
+  (dired-advertise)
+  (remove-hook 'kill-buffer-hook 'wdired-check-kill-buffer t)
+  (set (make-local-variable 'revert-buffer-function) 'dired-revert))
+
+(defun dired-sidebar-wdired-change-to-wdired-mode-advice (f &rest args)
+  "Forward to `wdired-change-to-wdired-mode'.
+
+`wdired' expected the `major-mode' to be `dired-mode' first.
+
+Track the current `major-mode' and revert to that upon exiting `wdired'."
+  (setq dired-sidebar-wdired-tracking-major-mode major-mode)
+  (if (eq major-mode 'dired-mode)
+      (apply f args)
+    (let ((major-mode 'dired-mode))
+      (apply f args))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;; `wdired' Hack ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (provide 'dired-sidebar)
 ;;; dired-sidebar.el ends here
