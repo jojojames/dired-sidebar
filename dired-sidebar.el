@@ -617,9 +617,8 @@ This is dependent on `dired-subtree-cycle'."
         (let ((window-size-fixed))
           (dired-sidebar-set-width dired-sidebar-width))))
     (with-current-buffer buffer
-      ;; For the case where we've already turned on the mode.
-      ;; FIXME: Not sure if we need this anymore..
-      (unless (eq major-mode 'dired-sidebar-mode)
+      (if (eq major-mode 'dired-sidebar-mode)
+          (dired-build-subdir-alist)
         (dired-sidebar-mode)))
     (dired-sidebar-update-state buffer)))
 
@@ -1067,6 +1066,7 @@ e.g. + and -."
   (advice-add 'dired-revert :before 'dired-sidebar-tui-reset-in-sidebar)
   (setq-local dired-subtree-line-prefix " ")
   (advice-add 'dired-subtree-toggle :after #'dired-sidebar-tui-update-with-delay)
+  (dired-build-subdir-alist)
   (dired-revert))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
