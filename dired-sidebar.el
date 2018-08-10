@@ -102,12 +102,14 @@ This uses format specified by `dired-sidebar-mode-line-format'."
 it is suitable for terminal.
 `icons' use `all-the-icons'.
 `nerd' use the nerdtree indentation mode and arrow.
-`none' use no theme."
+`none' use no theme.
+`vscode' use `vscode' icons \(Requires `imagemagick' support.\)"
   :group 'dired-sidebar
   :type '(choice (const ascii)
                  (const icons)
                  (const nerd)
-                 (const none)))
+                 (const none)
+                 (const vscode)))
 
 (defcustom dired-sidebar-width 35
   "Width of the `dired-sidebar' buffer."
@@ -305,7 +307,18 @@ a file."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-icon-scale .18
+  "The scale of icons \(currently only applies to vscode theme.\)."
+  :type 'number
+  :group 'dired-sidebar)
+
 ;; Internal
+
+(defvar dired-sidebar-basedir (file-name-directory load-file-name)
+  "Store the directory dired-sidebar.el was loaded from.")
+
+(defvar dired-sidebar-icons-dir (format "%sicons/" dired-sidebar-basedir)
+  "Store the icons directory of `dired-sidebar'.")
 
 (defvar dired-sidebar-alist '()
   "An alist that maps from frame to currently opened `dired-sidebar' buffer.")
@@ -486,6 +499,9 @@ Works around marker pointing to wrong buffer in Emacs 25."
     (with-no-warnings
       (all-the-icons-dired-mode)))
    ((eq dired-sidebar-theme 'nerd)
+    (dired-sidebar-setup-tui))
+   ((and (eq dired-sidebar-theme 'vscode)
+         (image-type-available-p 'imagemagick))
     (dired-sidebar-setup-tui))
    ((eq dired-sidebar-theme 'ascii)
     (dired-sidebar-setup-tui))
@@ -1031,11 +1047,15 @@ This function hides the sidebar before executing F and then reshows itself after
             (let ((file (dired-get-filename 'verbatim t)))
               (unless (member file '("." ".."))
                 (let ((filename (dired-get-filename nil t)))
-                  (if (file-directory-p filename)
-                      (if (dired-subtree--is-expanded-p)
-                          (insert (concat collapsible-icon " "))
-                        (insert (concat expandable-icon " ")))
-                    (insert ""))))))
+                  (if (eq dired-sidebar-theme 'vscode)
+                      (progn
+                        (insert-image (dired-sidebar-vscode-icon-for-file filename) " ")
+                        (insert " "))
+                    (if (file-directory-p filename)
+                        (if (dired-subtree--is-expanded-p)
+                            (insert (concat collapsible-icon " "))
+                          (insert (concat expandable-icon " ")))
+                      (insert "")))))))
           (forward-line 1))))))
 
 (defun dired-sidebar-tui-update-with-delay (&rest _)
@@ -1054,6 +1074,76 @@ This function hides the sidebar before executing F and then reshows itself after
   (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer)))
     (with-current-buffer buffer
       (dired-sidebar-tui-dired-reset))))
+
+(defun dired-sidebar--convert-icons-from-svg-to-png ()
+  "Private function to convert svg images to png."
+  (mapcar
+   (lambda (file)
+     (when (equal "svg" (file-name-extension file))
+       (shell-command (format "svgexport %s %s 4x" file
+                              (concat (file-name-sans-extension file) ".png")))))
+   (directory-files (format "%sicons" dired-sidebar-basedir) t)))
+
+(defvar dired-sidebar-vscode-icon-dir-alist '())
+
+(defvar dired-sidebar-vscode-icon-file-alist
+  '(;; Files.
+    ("projectile.cache" . "emacs")
+    ;; Extensions.
+    ("el" . "emacs")))
+
+(defun dired-sidebar-vscode-icon-for-file (file)
+  "Return an vscode icon image given FILE.
+
+Icon Source: https://github.com/vscode-icons/vscode-icons"
+  (if (file-directory-p file)
+      (dired-sidebar-vscode-dir-icon file)
+    (dired-sidebar-vscode-file-icon file)))
+
+(defun dired-sidebar-vscode-dir-icon (file)
+  "Get directory icon given FILE."
+  (if (file-exists-p (format "%sfolder_type_%s.png"
+                             dired-sidebar-icons-dir (file-name-base file)))
+      (dired-sidebar-create-image
+       (format "%sfolder_type_%s.png" dired-sidebar-icons-dir
+               (file-name-base file)))
+    (if-let ((val (alist-get file dired-sidebar-vscode-icon-dir-alist
+                             nil nil 'equal)))
+        (if (file-exists-p
+             (format "%sfolder_type_%s" dired-sidebar-icons-dir val))
+            (dired-sidebar-create-image
+             (format "%sfolder_type_%s.png" dired-sidebar-icons-dir val))
+          (dired-sidebar-create-image
+           (format "%sdefault_folder.png" dired-sidebar-icons-dir)))
+      (dired-sidebar-create-image
+       (format "%sdefault_folder.png" dired-sidebar-icons-dir)))))
+
+(defun dired-sidebar-vscode-file-icon (file)
+  "Get file icon given FILE."
+  (if (file-exists-p
+       (format "%sfile_type_%s.png"
+               dired-sidebar-icons-dir (file-name-extension file)))
+      (dired-sidebar-create-image
+       (format "%sfile_type_%s.png" dired-sidebar-icons-dir
+               (file-name-extension file)))
+    (if-let ((val (or (alist-get file dired-sidebar-vscode-icon-file-alist
+                                 nil nil 'equal)
+                      (alist-get (file-name-extension file)
+                                 dired-sidebar-vscode-icon-file-alist
+                                 nil nil 'equal))))
+        (if (file-exists-p (format "%sfile_type_%s.png"
+                                   dired-sidebar-icons-dir val))
+            (dired-sidebar-create-image
+             (format "%sfile_type_%s.png" dired-sidebar-icons-dir val))
+          (dired-sidebar-create-image
+           (format "%sdefault_file.png" dired-sidebar-icons-dir)))
+      (dired-sidebar-create-image
+       (format "%sdefault_file.png" dired-sidebar-icons-dir)))))
+
+(defun dired-sidebar-create-image (filename)
+  "Helper method to create and return an image given FILENAME."
+  (let ((scale dired-sidebar-icon-scale))
+    (create-image filename 'png nil :scale scale :ascent 'center)))
 
 (defun dired-sidebar-setup-tui ()
   "Sets up text user interface for `dired-sidebar'.
