@@ -4,6 +4,9 @@
 [[https://melpa.org/#/dired-sidebar][file:https://melpa.org/packages/dired-sidebar-badge.svg]]
 
 * Screenshots
+  With VSCode Icons
+  [[./screenshots/vscode.png]]
+
   With All The Icons
   [[./screenshots/one.png]]
 
