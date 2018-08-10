@@ -9,9 +9,9 @@
 
   If using VsCode theme, Emacs needs to be installed with imagemagick support.
 
-  ```
+  #+begin_src sh :tangle yes
   brew install emacs --HEAD --with-librsvg --with-cocoa --with-imagemagick@6
-  ```
+  #+end_src
 
   With All The Icons
   [[./screenshots/one.png]]
