@@ -1107,8 +1107,7 @@ Icon Source: https://github.com/vscode-icons/vscode-icons"
       (dired-sidebar-create-image
        (format "%sfolder_type_%s.png" dired-sidebar-icons-dir
                (file-name-base file)))
-    (if-let ((val (alist-get file dired-sidebar-vscode-icon-dir-alist
-                             nil nil 'equal)))
+    (if-let ((val (cdr (assoc file dired-sidebar-vscode-icon-dir-alist))))
         (if (file-exists-p
              (format "%sfolder_type_%s" dired-sidebar-icons-dir val))
             (dired-sidebar-create-image
@@ -1126,11 +1125,10 @@ Icon Source: https://github.com/vscode-icons/vscode-icons"
       (dired-sidebar-create-image
        (format "%sfile_type_%s.png" dired-sidebar-icons-dir
                (file-name-extension file)))
-    (if-let ((val (or (alist-get file dired-sidebar-vscode-icon-file-alist
-                                 nil nil 'equal)
-                      (alist-get (file-name-extension file)
-                                 dired-sidebar-vscode-icon-file-alist
-                                 nil nil 'equal))))
+    (if-let ((val (or
+                   (cdr (assoc file dired-sidebar-vscode-icon-file-alist))
+                   (cdr (assoc (file-name-extension file)
+                               dired-sidebar-vscode-icon-file-alist)))))
         (if (file-exists-p (format "%sfile_type_%s.png"
                                    dired-sidebar-icons-dir val))
             (dired-sidebar-create-image
