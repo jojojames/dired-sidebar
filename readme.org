@@ -53,28 +53,19 @@
   :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
   :ensure t
   :commands (dired-sidebar-toggle-sidebar)
+  :init
+  (add-hook 'dired-sidebar-mode-hook
+            (lambda ()
+              (unless (file-remote-p default-directory)
+                (auto-revert-mode))))
   :config
-  (setq dired-sidebar-subtree-line-prefix " .")
-  (cond
-   ((eq system-type 'darwin)
-    (if (display-graphic-p)
-        (setq dired-sidebar-theme 'icons)
-      (setq dired-sidebar-theme 'nerd))
-    (setq dired-sidebar-face '(:family "Helvetica" :height 140)))
-   ((eq system-type 'windows-nt)
-    (setq dired-sidebar-theme 'nerd)
-    (setq dired-sidebar-face '(:family "Lucida Sans Unicode" :height 110)))
-   (:default
-    (setq dired-sidebar-theme 'nerd)
-    (setq dired-sidebar-face '(:family "Arial" :height 140))))
+  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
 
+  (setq dired-sidebar-subtree-line-prefix "__")
+  (setq dired-sidebar-theme 'vscode)
   (setq dired-sidebar-use-term-integration t)
-  (setq dired-sidebar-use-custom-font t)
-
-  (use-package all-the-icons-dired
-    ;; M-x all-the-icons-install-fonts
-    :ensure t
-    :commands (all-the-icons-dired-mode)))
+  (setq dired-sidebar-use-custom-font t))
   #+end_src
 
   For configuration, I recommend looking at the defcustoms in ~dired-sidebar.el~.
@@ -82,11 +73,11 @@
   Sidebar can also be toggled together with [[https://github.com/jojojames/ibuffer-sidebar][ibuffer-sidebar]].
 
   #+begin_src emacs-lisp :tangle yes
-    (defun +sidebar-toggle ()
-      "Toggle both `dired-sidebar' and `ibuffer-sidebar'."
-      (interactive)
-      (dired-sidebar-toggle-sidebar)
-      (ibuffer-sidebar-toggle-sidebar))
+(defun sidebar-toggle ()
+  "Toggle both `dired-sidebar' and `ibuffer-sidebar'."
+  (interactive)
+  (dired-sidebar-toggle-sidebar)
+  (ibuffer-sidebar-toggle-sidebar))
   #+end_src
 
 * Features
