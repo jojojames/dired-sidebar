@@ -207,7 +207,7 @@ follow file."
   :type 'number
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-tui-update-delay 0.05
+(defcustom dired-sidebar-tui-update-delay 0.02
   "The time in idle seconds to wait before updating tui interface.
 
 This only takes effect if `all-the-icons-dired' is disabled."
