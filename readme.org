@@ -4,8 +4,14 @@
 [[https://melpa.org/#/dired-sidebar][file:https://melpa.org/packages/dired-sidebar-badge.svg]]
 
 * Screenshots
-  With VSCode Icons
+  With VsCode Icons
   [[./screenshots/vscode.png]]
+
+  If using VsCode theme, Emacs needs to be installed with imagemagick support.
+
+  ```
+  brew install emacs --HEAD --with-librsvg --with-cocoa --with-imagemagick@6
+  ```
 
   With All The Icons
   [[./screenshots/one.png]]
@@ -23,12 +29,7 @@
    #+begin_src emacs-lisp :tangle yes
 (use-package dired-sidebar
   :ensure t
-  :commands (dired-sidebar-toggle-sidebar)
-  :config
-  (use-package all-the-icons-dired
-    ;; M-x all-the-icons-install-fonts
-    :ensure t
-    :commands (all-the-icons-dired-mode)))
+  :commands (dired-sidebar-toggle-sidebar))
    #+end_src
 ** Minimal Bootstrap using Git
    #+begin_src sh :tangle yes
