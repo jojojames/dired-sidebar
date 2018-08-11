@@ -1049,7 +1049,10 @@ This function hides the sidebar before executing F and then reshows itself after
                 (let ((filename (dired-get-filename nil t)))
                   (if (eq dired-sidebar-theme 'vscode)
                       (progn
-                        (insert-image (dired-sidebar-vscode-icon-for-file filename) " ")
+                        (require 'vscode-icon)
+                        (when (fboundp 'vscode-icon-for-file)
+                          (insert-image
+                           (vscode-icon-for-file filename) " "))
                         (insert " "))
                     (if (file-directory-p filename)
                         (if (dired-subtree--is-expanded-p)
@@ -1083,65 +1086,6 @@ This function hides the sidebar before executing F and then reshows itself after
        (shell-command (format "svgexport %s %s 4x" file
                               (concat (file-name-sans-extension file) ".png")))))
    (directory-files (format "%sicons" dired-sidebar-basedir) t)))
-
-(defvar dired-sidebar-vscode-icon-dir-alist '())
-
-(defvar dired-sidebar-vscode-icon-file-alist
-  '(;; Files.
-    ("projectile.cache" . "emacs")
-    ;; Extensions.
-    ("el" . "emacs")))
-
-(defun dired-sidebar-vscode-icon-for-file (file)
-  "Return an vscode icon image given FILE.
-
-Icon Source: https://github.com/vscode-icons/vscode-icons"
-  (if (file-directory-p file)
-      (dired-sidebar-vscode-dir-icon file)
-    (dired-sidebar-vscode-file-icon file)))
-
-(defun dired-sidebar-vscode-dir-icon (file)
-  "Get directory icon given FILE."
-  (if (file-exists-p (format "%sfolder_type_%s.png"
-                             dired-sidebar-icons-dir (file-name-base file)))
-      (dired-sidebar-create-image
-       (format "%sfolder_type_%s.png" dired-sidebar-icons-dir
-               (file-name-base file)))
-    (if-let ((val (cdr (assoc file dired-sidebar-vscode-icon-dir-alist))))
-        (if (file-exists-p
-             (format "%sfolder_type_%s" dired-sidebar-icons-dir val))
-            (dired-sidebar-create-image
-             (format "%sfolder_type_%s.png" dired-sidebar-icons-dir val))
-          (dired-sidebar-create-image
-           (format "%sdefault_folder.png" dired-sidebar-icons-dir)))
-      (dired-sidebar-create-image
-       (format "%sdefault_folder.png" dired-sidebar-icons-dir)))))
-
-(defun dired-sidebar-vscode-file-icon (file)
-  "Get file icon given FILE."
-  (if (file-exists-p
-       (format "%sfile_type_%s.png"
-               dired-sidebar-icons-dir (file-name-extension file)))
-      (dired-sidebar-create-image
-       (format "%sfile_type_%s.png" dired-sidebar-icons-dir
-               (file-name-extension file)))
-    (if-let ((val (or
-                   (cdr (assoc file dired-sidebar-vscode-icon-file-alist))
-                   (cdr (assoc (file-name-extension file)
-                               dired-sidebar-vscode-icon-file-alist)))))
-        (if (file-exists-p (format "%sfile_type_%s.png"
-                                   dired-sidebar-icons-dir val))
-            (dired-sidebar-create-image
-             (format "%sfile_type_%s.png" dired-sidebar-icons-dir val))
-          (dired-sidebar-create-image
-           (format "%sdefault_file.png" dired-sidebar-icons-dir)))
-      (dired-sidebar-create-image
-       (format "%sdefault_file.png" dired-sidebar-icons-dir)))))
-
-(defun dired-sidebar-create-image (filename)
-  "Helper method to create and return an image given FILENAME."
-  (let ((scale dired-sidebar-icon-scale))
-    (create-image filename 'png nil :scale scale :ascent 'center)))
 
 (defun dired-sidebar-setup-tui ()
   "Sets up text user interface for `dired-sidebar'.
