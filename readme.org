@@ -4,16 +4,10 @@
 [[https://melpa.org/#/dired-sidebar][file:https://melpa.org/packages/dired-sidebar-badge.svg]]
 
 * Screenshots
-  With VsCode Icons
+  With [[https://github.com/jojojames/vscode-icon-emacs][VsCode Icons]]
   [[./screenshots/vscode.png]]
 
-  If using VsCode theme, Emacs needs to be installed with imagemagick support.
-
-  #+begin_src sh :tangle yes
-  brew install emacs --HEAD --with-librsvg --with-cocoa --with-imagemagick@6
-  #+end_src
-
-  With All The Icons
+  With [[https://github.com/jtbm37/all-the-icons-dired][All the Icons]]
   [[./screenshots/one.png]]
 
   With Arrows
