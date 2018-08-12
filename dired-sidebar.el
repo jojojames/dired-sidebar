@@ -103,7 +103,7 @@ it is suitable for terminal.
 `icons' use `all-the-icons'.
 `nerd' use the nerdtree indentation mode and arrow.
 `none' use no theme.
-`vscode' use `vscode' icons \(Requires `imagemagick' support.\)"
+`vscode' use `vscode' icons."
   :group 'dired-sidebar
   :type '(choice (const ascii)
                  (const icons)
@@ -500,8 +500,7 @@ Works around marker pointing to wrong buffer in Emacs 25."
       (all-the-icons-dired-mode)))
    ((eq dired-sidebar-theme 'nerd)
     (dired-sidebar-setup-tui))
-   ((and (eq dired-sidebar-theme 'vscode)
-         (image-type-available-p 'imagemagick))
+   ((eq dired-sidebar-theme 'vscode)
     (dired-sidebar-setup-tui))
    ((eq dired-sidebar-theme 'ascii)
     (dired-sidebar-setup-tui))
