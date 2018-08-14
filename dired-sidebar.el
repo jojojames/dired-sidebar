@@ -45,7 +45,7 @@
 (require 'dired-subtree)
 (require 'evil nil t)
 (require 'face-remap)
-(eval-when-compile (require 'subr-x))
+(eval-when-compile (require 'subr-x)) ; `if-let*' and `when-let*'
 
 ;; Compatibility
 
