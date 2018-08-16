@@ -491,6 +491,8 @@ Works around marker pointing to wrong buffer in Emacs 25."
      dired-sidebar-toggle-hidden-commands))
 
   (cond
+   ((dired-sidebar-using-tui-p)
+    (dired-sidebar-setup-tui))
    ((and (eq dired-sidebar-theme 'icons)
          (display-graphic-p)
          (or
@@ -498,8 +500,6 @@ Works around marker pointing to wrong buffer in Emacs 25."
           (autoloadp (symbol-function 'all-the-icons-dired-mode))))
     (with-no-warnings
       (all-the-icons-dired-mode)))
-   ((dired-sidebar-using-tui-p)
-    (dired-sidebar-setup-tui))
    (:default :no-theme))
 
   (when dired-sidebar-use-custom-font
