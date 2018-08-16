@@ -498,11 +498,7 @@ Works around marker pointing to wrong buffer in Emacs 25."
           (autoloadp (symbol-function 'all-the-icons-dired-mode))))
     (with-no-warnings
       (all-the-icons-dired-mode)))
-   ((eq dired-sidebar-theme 'nerd)
-    (dired-sidebar-setup-tui))
-   ((eq dired-sidebar-theme 'vscode)
-    (dired-sidebar-setup-tui))
-   ((eq dired-sidebar-theme 'ascii)
+   ((dired-sidebar-using-tui-p)
     (dired-sidebar-setup-tui))
    (:default :no-theme))
 
@@ -1100,7 +1096,7 @@ e.g. + and -."
 (defun dired-sidebar-using-tui-p ()
   "Return t if `dired-sidebar-theme' is using tui code path."
   (or
-   (eq dired-sidebar-theme 'tui)
+   (eq dired-sidebar-theme 'ascii)
    (eq dired-sidebar-theme 'nerd)
    (eq dired-sidebar-theme 'vscode)))
 
