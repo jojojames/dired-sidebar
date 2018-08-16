@@ -1077,15 +1077,6 @@ This function hides the sidebar before executing F and then reshows itself after
     (with-current-buffer buffer
       (dired-sidebar-tui-dired-reset))))
 
-(defun dired-sidebar--convert-icons-from-svg-to-png ()
-  "Private function to convert svg images to png."
-  (mapcar
-   (lambda (file)
-     (when (equal "svg" (file-name-extension file))
-       (shell-command (format "svgexport %s %s 4x" file
-                              (concat (file-name-sans-extension file) ".png")))))
-   (directory-files (format "%sicons" dired-sidebar-basedir) t)))
-
 (defun dired-sidebar-setup-tui ()
   "Sets up text user interface for `dired-sidebar'.
 
