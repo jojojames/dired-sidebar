@@ -608,7 +608,8 @@ This is dependent on `dired-subtree-cycle'."
                 (dired-subtree-cycle))
               (setq path (concat path "/"))))))
       (when dired-sidebar-recenter-cursor-on-follow-file
-        (recenter nil)))))
+        (recenter nil))
+      (dired-sidebar-redisplay-icons))))
 
 ;;;###autoload
 (defun dired-sidebar-toggle-with-current-directory ()
@@ -1004,11 +1005,17 @@ This is somewhat experimental/hacky."
   "Wrapper over `dired-subtree-toggle' that accounts for `all-the-icons-dired'."
   (interactive)
   (dired-subtree-toggle)
+  (dired-sidebar-redisplay-icons))
+
+(defun dired-sidebar-redisplay-icons ()
+  "Redisplay icon themes."
   (when (and (eq dired-sidebar-theme 'icons)
              (fboundp 'all-the-icons-dired--display))
     ;; Refresh `all-the-icons-dired'.
     (dired-revert)
-    (all-the-icons-dired--display)))
+    (all-the-icons-dired--display))
+  (when (dired-sidebar-using-tui-p)
+    (dired-sidebar-tui-update-with-delay)))
 
 (defun dired-sidebar-advice-hide-temporarily (f &rest args)
   "A function meant to be used with advice to temporarily hide itself.
@@ -1087,9 +1094,15 @@ e.g. + and -."
             'dired-sidebar-tui-dired-display :append :local)
   (advice-add 'dired-revert :before 'dired-sidebar-tui-reset-in-sidebar)
   (setq-local dired-subtree-line-prefix " ")
-  (advice-add 'dired-subtree-toggle :after #'dired-sidebar-tui-update-with-delay)
   (dired-build-subdir-alist)
   (dired-revert))
+
+(defun dired-sidebar-using-tui-p ()
+  "Return t if `dired-sidebar-theme' is using tui code path."
+  (or
+   (eq dired-sidebar-theme 'tui)
+   (eq dired-sidebar-theme 'nerd)
+   (eq dired-sidebar-theme 'vscode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
