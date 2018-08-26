@@ -424,7 +424,9 @@ Works around marker pointing to wrong buffer in Emacs 25."
              (fboundp 'dired-collapse-mode))
     (add-hook 'dired-mode-hook
               (lambda ()
-                (dired-collapse-mode -1)) :append :local))
+                (when (bound-and-true-p dired-collapse-mode)
+                  (dired-collapse-mode -1)))
+              :append :local))
 
   (when (and
          (not dired-sidebar-display-autorevert-messages)
