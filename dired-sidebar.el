@@ -96,7 +96,9 @@ it is suitable for terminal.
 `icons' use `all-the-icons'.
 `nerd' use the nerdtree indentation mode and arrow.
 `none' use no theme.
-`vscode' use `vscode' icons."
+`vscode' use `vscode' icons.
+
+This only takes effect if on a local connection. (e.g. Not Tramp)"
   :group 'dired-sidebar
   :type '(choice (const ascii)
                  (const icons)
@@ -485,17 +487,18 @@ Works around marker pointing to wrong buffer in Emacs 25."
        (advice-add x :around #'dired-sidebar-advice-hide-temporarily))
      dired-sidebar-toggle-hidden-commands))
 
-  (cond
-   ((dired-sidebar-using-tui-p)
-    (dired-sidebar-setup-tui))
-   ((and (eq dired-sidebar-theme 'icons)
-         (display-graphic-p)
-         (or
-          (fboundp 'all-the-icons-dired-mode)
-          (autoloadp (symbol-function 'all-the-icons-dired-mode))))
-    (with-no-warnings
-      (all-the-icons-dired-mode)))
-   (:default :no-theme))
+  (unless (file-remote-p default-directory)
+    (cond
+     ((dired-sidebar-using-tui-p)
+      (dired-sidebar-setup-tui))
+     ((and (eq dired-sidebar-theme 'icons)
+           (display-graphic-p)
+           (or
+            (fboundp 'all-the-icons-dired-mode)
+            (autoloadp (symbol-function 'all-the-icons-dired-mode))))
+      (with-no-warnings
+        (all-the-icons-dired-mode)))
+     (:default :no-theme)))
 
   (when dired-sidebar-use-custom-font
     (dired-sidebar-set-font))
