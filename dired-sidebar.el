@@ -687,7 +687,7 @@ window selection."
        (if select-with-alt-window-function
            (funcall dired-sidebar-alternate-select-window-function)
          (if dired-sidebar-open-file-in-most-recently-used-window
-             (get-mru-window)
+             (get-mru-window nil nil t)
            (next-window))))
       (find-file dired-file-name)
       (when dired-sidebar-close-sidebar-on-file-open
