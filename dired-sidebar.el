@@ -760,12 +760,19 @@ the relevant file-directory clicked on by the mouse."
   (get-buffer buffer-name))
 
 (defun dired-sidebar-sidebar-root ()
-  "Return directory using `projectile' or current directory otherwise."
-  (condition-case nil
-      (if (fboundp 'projectile-project-root)
-          (projectile-project-root)
-        default-directory)
-    (error default-directory)))
+  "Return directory using `projectile', `project' or current directory."
+  (if (featurep 'projectile)
+      (condition-case nil
+          (if (fboundp 'projectile-project-root)
+              (projectile-project-root)
+            default-directory)
+        (error default-directory))
+    ;; Use `project' if `projectile' is not loaded yet.
+    ;; `projectile' is a big package and takes a while to load so it's better
+    ;; to defer loading it as long as possible (until the user chooses).
+    (dired-sidebar-if-let* ((project (project-current)))
+        (cdr project)
+      default-directory)))
 
 (defun dired-sidebar-buffer-name (dir)
   "Return name of `dired-sidebar' buffer given DIR."
