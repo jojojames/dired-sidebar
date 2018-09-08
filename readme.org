@@ -5,20 +5,20 @@
 
 * Screenshots
   With [[https://github.com/jojojames/vscode-icon-emacs][VsCode Icons]]
-  [[./screenshots/vscode.png]]
   [[https://github.com/syl20bnr/spacemacs-theme][Spacemacs Light]]
+  [[./screenshots/vscode.png]]
 
   With [[https://github.com/jtbm37/all-the-icons-dired][All the Icons]]
-  [[./screenshots/one.png]]
   [[https://github.com/sellout/emacs-color-theme-solarized][Solarized Light]]
+  [[./screenshots/one.png]]
 
   With Arrows
-  [[./screenshots/arrows.png]]
   [[https://github.com/anandpiyer/seoul256-emacs][Seoul-256]]
+  [[./screenshots/arrows.png]]
 
   With Text UI
-  [[./screenshots/tui.png]]
   [[https://github.com/hlissner/emacs-doom-themes][Doom Peacock]]
+  [[./screenshots/tui.png]]
 
 * Installation
 ** Melpa
