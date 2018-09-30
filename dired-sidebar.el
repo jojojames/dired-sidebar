@@ -1110,6 +1110,9 @@ e.g. + and -."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; `wdired' Hack ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=32392
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;; `wdired' Hack ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defvar-local dired-sidebar-wdired-tracking-major-mode nil
   "Track current `major-mode' when toggling to `wdired'.")
 
