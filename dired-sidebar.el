@@ -764,7 +764,7 @@ the relevant file-directory clicked on by the mouse."
   (if (featurep 'projectile)
       (condition-case nil
           (if (fboundp 'projectile-project-root)
-              (projectile-project-root)
+              (or (projectile-project-root) default-directory)
             default-directory)
         (error default-directory))
     ;; Use `project' if `projectile' is not loaded yet.
