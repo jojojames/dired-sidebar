@@ -307,6 +307,16 @@ a file."
   :type 'number
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-no-delete-other-windows nil
+  "Whether or not to add `no-delete-other-window' parameter to window.
+
+If this is true, when calling `delete-other-windows', `dired-sidebar' window
+will continue showing.
+
+For more information, look up `delete-other-windows'."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 ;; Internal
 
 (defvar dired-sidebar-basedir (file-name-directory load-file-name)
@@ -625,6 +635,8 @@ This is dependent on `dired-subtree-cycle'."
                      (dired-sidebar-get-dir-to-show)))))
     (display-buffer-in-side-window buffer dired-sidebar-display-alist)
     (let ((window (get-buffer-window buffer)))
+      (when dired-sidebar-no-delete-other-windows
+        (set-window-parameter window 'no-delete-other-windows t))
       (set-window-dedicated-p window t)
       (with-selected-window window
         (let ((window-size-fixed))
