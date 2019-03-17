@@ -322,6 +322,11 @@ For more information, look up `delete-other-windows'."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-one-instance nil
+  "Only show one buffer instance for dired-sidebar."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 ;; Internal
 
 (defvar dired-sidebar-basedir (file-name-directory load-file-name)
@@ -553,12 +558,15 @@ With universal argument, use current directory."
   (interactive)
   (if (dired-sidebar-showing-sidebar-p)
       (dired-sidebar-hide-sidebar)
-    (let* ((file-to-show (dired-sidebar-get-file-to-show))
+    (let* ((old-buf (dired-sidebar-buffer (selected-frame)))
+           (file-to-show (dired-sidebar-get-file-to-show))
            (dir-to-show (or dir
                             (when current-prefix-arg default-directory)
                             (dired-sidebar-get-dir-to-show)))
            (sidebar-buffer (dired-sidebar-get-or-create-buffer dir-to-show)))
       (dired-sidebar-show-sidebar sidebar-buffer)
+      (when (and dired-sidebar-one-instance old-buf (not (eq sidebar-buffer old-buf)))
+        (kill-buffer old-buf))
       (if (and dired-sidebar-follow-file-at-point-on-toggle-open
                file-to-show)
           (if dired-sidebar-pop-to-sidebar-on-toggle-open
@@ -690,7 +698,8 @@ window selection."
              (not (string= (file-name-nondirectory dired-file-name)
                            ".")))
         (dired-sidebar-with-no-dedication
-         (let ((buf-name (dired-sidebar-buffer-name
+         (let ((old-buf (current-buffer))
+               (buf-name (dired-sidebar-buffer-name
                           dired-file-name)))
            (if (dired-sidebar-buffer-exists-p buf-name)
                (progn
@@ -699,7 +708,9 @@ window selection."
              ;; Copied from `dired-find-file'.
              (find-file dired-file-name)
              (dired-sidebar-mode)
-             (dired-sidebar-update-state (current-buffer)))))
+             (dired-sidebar-update-state (current-buffer))
+             (when (and dired-sidebar-one-instance (not (eq (current-buffer) old-buf)))
+               (kill-buffer old-buf)))))
       ;; Select the sidebar window so that `next-window' is consistent
       ;; in picking the window next to the sidebar.
       ;; This is useful for when `dired-sidebar-find-file' is called
@@ -733,7 +744,8 @@ Select alternate window using `dired-sidebar-alternate-select-window-function'."
    ;; not the one at point.
    (when dired-sidebar-skip-subtree-parent
      (goto-char (point-min)))
-   (let* ((dir (dired-current-directory))
+   (let* ((old-buf (current-buffer))
+          (dir (dired-current-directory))
           (up (file-name-directory (directory-file-name dir)))
           (up-name (dired-sidebar-buffer-name up)))
      (if (dired-sidebar-buffer-exists-p up-name)
@@ -742,7 +754,9 @@ Select alternate window using `dired-sidebar-alternate-select-window-function'."
            (dired-sidebar-update-state (current-buffer)))
        (dired-up-directory)
        (dired-sidebar-mode)
-       (dired-sidebar-update-state (current-buffer)))
+       (dired-sidebar-update-state (current-buffer))
+       (when (and dired-sidebar-one-instance (not (eq (current-buffer) old-buf)))
+         (kill-buffer old-buf)))
      (let ((default-directory up))
        (dired-goto-file dir)))))
 
