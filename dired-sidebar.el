@@ -500,19 +500,6 @@ Works around marker pointing to wrong buffer in Emacs 25."
        (advice-add x :around #'dired-sidebar-advice-hide-temporarily))
      dired-sidebar-toggle-hidden-commands))
 
-  (unless (file-remote-p default-directory)
-    (cond
-     ((dired-sidebar-using-tui-p)
-      (dired-sidebar-setup-tui))
-     ((and (eq dired-sidebar-theme 'icons)
-           (display-graphic-p)
-           (or
-            (fboundp 'all-the-icons-dired-mode)
-            (autoloadp (symbol-function 'all-the-icons-dired-mode))))
-      (with-no-warnings
-        (all-the-icons-dired-mode)))
-     (:default :no-theme)))
-
   (when dired-sidebar-use-custom-font
     (dired-sidebar-set-font))
 
@@ -532,7 +519,23 @@ Works around marker pointing to wrong buffer in Emacs 25."
   (dired-build-subdir-alist)
   (dired-unadvertise (dired-current-directory))
   (dired-sidebar-update-buffer-name)
-  (dired-sidebar-update-state (current-buffer)))
+  (dired-sidebar-update-state (current-buffer))
+
+  ;; Move setting theme until the end after `dired-sidebar' has set up
+  ;; its directory structure.
+  ;; https://github.com/jojojames/dired-sidebar/issues/29
+  (unless (file-remote-p default-directory)
+    (cond
+     ((dired-sidebar-using-tui-p)
+      (dired-sidebar-setup-tui))
+     ((and (eq dired-sidebar-theme 'icons)
+           (display-graphic-p)
+           (or
+            (fboundp 'all-the-icons-dired-mode)
+            (autoloadp (symbol-function 'all-the-icons-dired-mode))))
+      (with-no-warnings
+        (all-the-icons-dired-mode)))
+     (:default :no-theme))))
 
 ;; User Interface
 
