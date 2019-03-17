@@ -121,6 +121,11 @@ This only takes effect if on a local connection. (e.g. Not Tramp)"
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-skip-subtree-parent t
+  "Whether to skip subtree parent directory when jumping up."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 (defcustom dired-sidebar-pop-to-sidebar-on-toggle-open t
   "Whether to jump to sidebar upon toggling open.
 
@@ -726,7 +731,8 @@ Select alternate window using `dired-sidebar-alternate-select-window-function'."
    ;; If `dired-subtree' is used, `dired-current-directory' is redefined.
    ;; So move point to the top of the buffer to get the actual directory and
    ;; not the one at point.
-   (goto-char (point-min))
+   (when dired-sidebar-skip-subtree-parent
+     (goto-char (point-min)))
    (let* ((dir (dired-current-directory))
           (up (file-name-directory (directory-file-name dir)))
           (up-name (dired-sidebar-buffer-name up)))
