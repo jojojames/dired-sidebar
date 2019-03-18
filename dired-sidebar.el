@@ -323,7 +323,7 @@ For more information, look up `delete-other-windows'."
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar-one-instance nil
-  "Only show one buffer instance for dired-sidebar."
+  "Only show one buffer instance for dired-sidebar for each frame."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -698,19 +698,18 @@ window selection."
              (not (string= (file-name-nondirectory dired-file-name)
                            ".")))
         (dired-sidebar-with-no-dedication
-         (let ((old-buf (current-buffer))
-               (buf-name (dired-sidebar-buffer-name
+         (let ((buf-name (dired-sidebar-buffer-name
                           dired-file-name)))
            (if (dired-sidebar-buffer-exists-p buf-name)
                (progn
                  (switch-to-buffer buf-name)
                  (dired-sidebar-update-state (current-buffer)))
-             ;; Copied from `dired-find-file'.
-             (find-file dired-file-name)
+             (if (and dired-sidebar-one-instance (file-directory-p dired-file-name))
+                 (find-alternate-file dired-file-name)
+               ;; Copied from `dired-find-file'.
+               (find-file dired-file-name))
              (dired-sidebar-mode)
-             (dired-sidebar-update-state (current-buffer))
-             (when (and dired-sidebar-one-instance (not (eq (current-buffer) old-buf)))
-               (kill-buffer old-buf)))))
+             (dired-sidebar-update-state (current-buffer)))))
       ;; Select the sidebar window so that `next-window' is consistent
       ;; in picking the window next to the sidebar.
       ;; This is useful for when `dired-sidebar-find-file' is called
@@ -744,19 +743,18 @@ Select alternate window using `dired-sidebar-alternate-select-window-function'."
    ;; not the one at point.
    (when dired-sidebar-skip-subtree-parent
      (goto-char (point-min)))
-   (let* ((old-buf (current-buffer))
-          (dir (dired-current-directory))
+   (let* ((dir (dired-current-directory))
           (up (file-name-directory (directory-file-name dir)))
           (up-name (dired-sidebar-buffer-name up)))
      (if (dired-sidebar-buffer-exists-p up-name)
          (progn
            (switch-to-buffer up-name)
            (dired-sidebar-update-state (current-buffer)))
-       (dired-up-directory)
+         (if dired-sidebar-one-instance
+             (find-alternate-file "..")
+           (dired-up-directory))
        (dired-sidebar-mode)
-       (dired-sidebar-update-state (current-buffer))
-       (when (and dired-sidebar-one-instance (not (eq (current-buffer) old-buf)))
-         (kill-buffer old-buf)))
+       (dired-sidebar-update-state (current-buffer)))
      (let ((default-directory up))
        (dired-goto-file dir)))))
 
