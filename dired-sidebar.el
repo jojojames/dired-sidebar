@@ -526,7 +526,14 @@ Works around marker pointing to wrong buffer in Emacs 25."
            dired-sidebar-follow-file-idle-delay
            t #'dired-sidebar-follow-file)))
 
+  ;; This comment is taken from `dired-readin'.
+  ;; Begin --- Copied comment from dired.el.
+  ;; Must first make alist buffer local and set it to nil because
+  ;; dired-build-subdir-alist will call dired-clear-alist first
+  ;; End --- Copied comment from dired.el.
+  (setq-local dired-subdir-alist nil)
   (dired-build-subdir-alist)
+
   (dired-unadvertise (dired-current-directory))
   (dired-sidebar-update-buffer-name)
   (dired-sidebar-update-state (current-buffer))
