@@ -750,9 +750,9 @@ Select alternate window using `dired-sidebar-alternate-select-window-function'."
          (progn
            (switch-to-buffer up-name)
            (dired-sidebar-update-state (current-buffer)))
-         (if dired-sidebar-one-instance-p
-             (find-alternate-file "..")
-           (dired-up-directory))
+       (if dired-sidebar-one-instance-p
+           (find-alternate-file "..")
+         (dired-up-directory))
        (dired-sidebar-mode)
        (dired-sidebar-update-state (current-buffer)))
      (let ((default-directory up))
