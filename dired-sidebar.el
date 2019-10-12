@@ -371,6 +371,7 @@ will check if buffer is stale through `auto-revert-mode'.")
     (define-key map (kbd "RET") 'dired-sidebar-find-file)
     (define-key map (kbd "<return>") 'dired-sidebar-find-file)
     (define-key map "^" 'dired-sidebar-up-directory)
+    (define-key map "-" 'dired-sidebar-up-directory)
     (define-key map (kbd "C-o") 'dired-sidebar-find-file-alt)
     (define-key map [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file)
 
@@ -385,6 +386,7 @@ will check if buffer is stale through `auto-revert-mode'.")
                             (kbd "RET") 'dired-sidebar-find-file
                             (kbd "<return>") 'dired-sidebar-find-file
                             "^" 'dired-sidebar-up-directory
+                            "-" 'dired-sidebar-up-directory
                             (kbd "C-o") 'dired-sidebar-find-file-alt
                             [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file))))
     map)
