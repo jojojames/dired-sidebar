@@ -381,6 +381,7 @@ will check if buffer is stale through `auto-revert-mode'.")
       (with-eval-after-load 'evil
         (when (fboundp 'evil-define-key*)
           (evil-define-key* 'normal map
+                            (kbd "TAB") 'dired-sidebar-subtree-toggle
                             [tab] 'dired-sidebar-subtree-toggle
                             (kbd "C-m") 'dired-sidebar-find-file
                             (kbd "RET") 'dired-sidebar-find-file
