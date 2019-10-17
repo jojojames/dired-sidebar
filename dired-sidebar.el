@@ -36,7 +36,6 @@
 
 (require 'dired)
 (require 'dired-subtree)
-(require 'evil nil t)
 (require 'face-remap)
 (eval-when-compile (require 'subr-x)) ; `if-let*' and `when-let*'
 
@@ -142,15 +141,7 @@ select the sidebar window."
   :type 'boolean
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-use-evil-integration t
-  "Whether to integrate with evil.
 
-This needs to be set before calling command `dired-sidebar-mode'
-for the first time.
-
-If using `use-package', set this in :init."
-  :type 'boolean
-  :group 'dired-sidebar)
 
 (defcustom dired-sidebar-use-magit-integration t
   "Whether to integrate with `magit-mode'.
@@ -374,22 +365,6 @@ will check if buffer is stale through `auto-revert-mode'.")
     (define-key map "-" 'dired-sidebar-up-directory)
     (define-key map (kbd "C-o") 'dired-sidebar-find-file-alt)
     (define-key map [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file)
-
-    ;; Not sure why this doesn't load the bindings if it's
-    ;; set up in the minor mode.
-    (when dired-sidebar-use-evil-integration
-      (with-eval-after-load 'evil
-        (when (fboundp 'evil-define-key*)
-          (evil-define-key* 'normal map
-                            (kbd "TAB") 'dired-sidebar-subtree-toggle
-                            [tab] 'dired-sidebar-subtree-toggle
-                            (kbd "C-m") 'dired-sidebar-find-file
-                            (kbd "RET") 'dired-sidebar-find-file
-                            (kbd "<return>") 'dired-sidebar-find-file
-                            "^" 'dired-sidebar-up-directory
-                            "-" 'dired-sidebar-up-directory
-                            (kbd "C-o") 'dired-sidebar-find-file-alt
-                            [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file))))
     map)
   "Keymap used for symbol `dired-sidebar-mode'.")
 
