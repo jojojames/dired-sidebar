@@ -1027,7 +1027,8 @@ This is somewhat experimental/hacky."
   "Wrapper over `dired-subtree-toggle' that accounts for `all-the-icons-dired'."
   (interactive)
   (dired-subtree-toggle)
-  (dired-sidebar-redisplay-icons))
+  (unless (file-remote-p default-directory)
+    (dired-sidebar-redisplay-icons)))
 
 (defun dired-sidebar-redisplay-icons ()
   "Redisplay icon themes."
