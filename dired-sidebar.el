@@ -1027,18 +1027,18 @@ This is somewhat experimental/hacky."
   "Wrapper over `dired-subtree-toggle' that accounts for `all-the-icons-dired'."
   (interactive)
   (dired-subtree-toggle)
-  (unless (file-remote-p default-directory)
-    (dired-sidebar-redisplay-icons)))
+  (dired-sidebar-redisplay-icons))
 
 (defun dired-sidebar-redisplay-icons ()
-  "Redisplay icon themes."
-  (when (and (eq dired-sidebar-theme 'icons)
-             (fboundp 'all-the-icons-dired--display))
-    ;; Refresh `all-the-icons-dired'.
-    (dired-sidebar-revert)
-    (all-the-icons-dired--display))
-  (when (dired-sidebar-using-tui-p)
-    (dired-sidebar-tui-update-with-delay)))
+  "Redisplay icon themes unless over TRAMP."
+  (unless (file-remote-p default-directory)
+    (when (and (eq dired-sidebar-theme 'icons)
+               (fboundp 'all-the-icons-dired--display))
+      ;; Refresh `all-the-icons-dired'.
+      (dired-sidebar-revert)
+      (all-the-icons-dired--display))
+    (when (dired-sidebar-using-tui-p)
+      (dired-sidebar-tui-update-with-delay))))
 
 (defun dired-sidebar-advice-hide-temporarily (f &rest args)
   "A function meant to be used with advice to temporarily hide itself.
