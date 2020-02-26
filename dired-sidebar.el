@@ -546,7 +546,8 @@ With universal argument, use current directory."
     (let* ((old-buffer (dired-sidebar-buffer (selected-frame)))
            (file-to-show (dired-sidebar-get-file-to-show))
            (dir-to-show (or dir
-                            (when current-prefix-arg default-directory)
+                            (when current-prefix-arg
+                              (expand-file-name default-directory))
                             (dired-sidebar-get-dir-to-show)))
            (sidebar-buffer (dired-sidebar-get-or-create-buffer dir-to-show)))
       (dired-sidebar-show-sidebar sidebar-buffer)
