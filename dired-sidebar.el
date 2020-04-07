@@ -1034,10 +1034,10 @@ This is somewhat experimental/hacky."
   "Redisplay icon themes unless over TRAMP."
   (unless (file-remote-p default-directory)
     (when (and (eq dired-sidebar-theme 'icons)
-               (fboundp 'all-the-icons-dired--display))
+               (fboundp 'all-the-icons-dired--refresh))
       ;; Refresh `all-the-icons-dired'.
       (dired-sidebar-revert)
-      (all-the-icons-dired--display))
+      (all-the-icons-dired--refresh))
     (when (dired-sidebar-using-tui-p)
       (dired-sidebar-tui-update-with-delay))))
 
