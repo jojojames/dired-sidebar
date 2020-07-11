@@ -580,7 +580,8 @@ This is dependent on `dired-subtree-cycle'."
              ;; Imagine root is /root/var/ and name is
              ;; /root/var/a/b/c.
              ;; This will return a list of '\("a" "b" "c"\).
-             (dirs (split-string (cadr (split-string name root)) "/")))
+             (dirs (when (cadr (split-string name root))
+                     (split-string (cadr (split-string name root)) "/"))))
         (dolist (dir dirs)
           (let ((path-regex (concat "^.*[[:space:]]" (regexp-quote dir))))
             (setq path (concat path dir))
