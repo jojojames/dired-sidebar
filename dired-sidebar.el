@@ -703,12 +703,16 @@ window selection."
       ;; from a buffer that is not already in the sidebar buffer.
       ;; e.g. A mouse click event.
       (switch-to-buffer (dired-sidebar-buffer))
-      (select-window
-       (if select-with-alt-window-function
-           (funcall dired-sidebar-alternate-select-window-function)
-         (if dired-sidebar-open-file-in-most-recently-used-window
-             (get-mru-window nil nil t)
-           (next-window))))
+      (let ((window
+             (if select-with-alt-window-function
+                 (funcall dired-sidebar-alternate-select-window-function)
+               (if dired-sidebar-open-file-in-most-recently-used-window
+                   (get-mru-window nil nil t)
+                 (next-window)))))
+        ;; https://github.com/jojojames/dired-sidebar/issues/55
+        (if (or (null window) (window-dedicated-p window))
+            (select-window (split-window (next-window) nil 'right))
+          (select-window window)))
       (find-file dired-file-name)
       (when dired-sidebar-close-sidebar-on-file-open
         (dired-sidebar-hide-sidebar)))))
