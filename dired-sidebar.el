@@ -1135,7 +1135,7 @@ This is used in place of `all-the-icons' to add directory indicators.
 e.g. + and -."
   (add-hook 'dired-after-readin-hook
             'dired-sidebar-tui-dired-display :append :local)
-  (setq-local dired-subtree-line-prefix " ")
+  (setq-local dired-subtree-line-prefix dired-sidebar-subtree-line-prefix)
   (dired-build-subdir-alist)
   (dired-sidebar-revert))
 
