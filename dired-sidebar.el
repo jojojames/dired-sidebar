@@ -141,8 +141,6 @@ select the sidebar window."
   :type 'boolean
   :group 'dired-sidebar)
 
-
-
 (defcustom dired-sidebar-use-magit-integration t
   "Whether to integrate with `magit-mode'.
 
@@ -315,6 +313,11 @@ For more information, look up `delete-other-windows'."
 
 (defcustom dired-sidebar-one-instance-p nil
   "Only show one buffer instance for dired-sidebar for each frame."
+  :type 'boolean
+  :group 'dired-sidebar)
+
+(defcustom dired-sidebar-display-icons-for-remote-p nil
+  "Show icons for remote directories. nil by default for performance reasons."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -519,7 +522,7 @@ Works around marker pointing to wrong buffer in Emacs 25."
   ;; Move setting theme until the end after `dired-sidebar' has set up
   ;; its directory structure.
   ;; https://github.com/jojojames/dired-sidebar/issues/29
-  (unless (file-remote-p default-directory)
+  (when (dired-sidebar-can-display-icons)
     (cond
      ((dired-sidebar-using-tui-p)
       (dired-sidebar-setup-tui))
@@ -1037,7 +1040,7 @@ This is somewhat experimental/hacky."
 
 (defun dired-sidebar-redisplay-icons ()
   "Redisplay icon themes unless over TRAMP."
-  (unless (file-remote-p default-directory)
+  (when (dired-sidebar-can-display-icons)
     (when (and (eq dired-sidebar-theme 'icons)
                (fboundp 'all-the-icons-dired--refresh))
       ;; Refresh `all-the-icons-dired'.
@@ -1056,6 +1059,12 @@ This function hides the sidebar before executing F and then reshows itself after
       (dired-sidebar-hide-sidebar)
       (apply f args)
       (dired-sidebar-show-sidebar sidebar))))
+
+(defun dired-sidebar-can-display-icons ()
+  "Return whether or not icons should be displayed."
+  (or
+   dired-sidebar-display-icons-for-remote-p
+   (not (file-remote-p default-directory))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
