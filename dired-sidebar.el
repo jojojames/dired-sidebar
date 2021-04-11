@@ -781,7 +781,8 @@ the relevant file-directory clicked on by the mouse."
                (file-directory-p file)
                (not (string-suffix-p "." file)))
           (dired-subtree-cycle)
-        (dired-sidebar-find-file file)))))
+        (dired-sidebar-find-file file))))
+  (dired-sidebar-redisplay-icons))
 
 ;; Helpers
 
