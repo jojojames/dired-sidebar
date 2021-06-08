@@ -802,7 +802,12 @@ the relevant file-directory clicked on by the mouse."
     ;; `projectile' is a big package and takes a while to load so it's better
     ;; to defer loading it as long as possible (until the user chooses).
     (dired-sidebar-if-let* ((project (project-current)))
-        (cdr project)
+        ;; https://github.com/jojojames/dired-sidebar/issues/61
+        (if (eq (type-of project) 'ede-proj-project)
+            ;; Found from calling: (eieio-class-slots 'ede-proj-project)
+            (slot-value project 'directory)
+          ;; e.g. (vc . "~/.emacs.d/straight/repos/dired-sidebar/")
+          (cdr project))
       default-directory)))
 
 (defun dired-sidebar-buffer-name (dir)
