@@ -70,7 +70,7 @@ This face can be customized using `dired-sidebar-face'."
   "Face used by `dired-sidebar' for custom font.
 
 This only takes effect if `dired-sidebar-use-custom-font' is true."
-  :type 'list
+  :type 'face
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar-use-custom-modeline t
