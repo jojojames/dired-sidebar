@@ -806,7 +806,8 @@ the relevant file-directory clicked on by the mouse."
             ;; Found from calling: (eieio-class-slots 'ede-proj-project)
             (slot-value project 'directory)
           ;; e.g. (vc . "~/.emacs.d/straight/repos/dired-sidebar/")
-          (cdr project))
+          ;; or (vc Git "~/.emacs.d/straight/repos/dired-sidebar/")
+          (car (last project)))
       default-directory)))
 
 (defun dired-sidebar-buffer-name (dir)
