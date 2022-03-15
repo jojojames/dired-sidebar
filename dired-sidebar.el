@@ -800,14 +800,8 @@ the relevant file-directory clicked on by the mouse."
     ;; Use `project' if `projectile' is not loaded yet.
     ;; `projectile' is a big package and takes a while to load so it's better
     ;; to defer loading it as long as possible (until the user chooses).
-    (dired-sidebar-if-let* ((project (project-current)))
-        ;; https://github.com/jojojames/dired-sidebar/issues/61
-        (if (eq (type-of project) 'ede-proj-project)
-            ;; Found from calling: (eieio-class-slots 'ede-proj-project)
-            (slot-value project 'directory)
-          ;; e.g. (vc . "~/.emacs.d/straight/repos/dired-sidebar/")
-          ;; or (vc Git "~/.emacs.d/straight/repos/dired-sidebar/")
-          (car (last project)))
+    (dired-sidebar-if-let* ((pr (project-current)))
+        (project-root pr)
       default-directory)))
 
 (defun dired-sidebar-buffer-name (dir)
