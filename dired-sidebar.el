@@ -312,12 +312,17 @@ For more information, look up `delete-other-windows'."
   :type 'boolean
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-one-instance-p nil
+
+(define-obsolete-variable-alias 'dired-sidebar-one-instance-p
+'dired-sidebar-use-one-instance "2022-04-13")
+(defcustom dired-sidebar-use-one-instance nil
   "Only show one buffer instance for dired-sidebar for each frame."
   :type 'boolean
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-display-icons-for-remote-p nil
+(define-obsolete-variable-alias 'dired-sidebar-display-icons-for-remote-p
+'dired-sidebar-display-remote-icons "2022-04-13")
+(defcustom dired-sidebar-display-remote-icons nil
   "Show icons for remote directories. nil by default for performance reasons."
   :type 'boolean
   :group 'dired-sidebar)
