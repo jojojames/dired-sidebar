@@ -109,8 +109,10 @@ This only takes effect if on a local connection. (e.g. Not Tramp)"
   :type 'integer
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-refresh-on-projectile-switch t
-  "Refresh sidebar when `projectile' changes projects."
+(define-obsolete-variable-alias 'dired-sidebar-refresh-on-projectile-switch
+'dired-sidebar-refresh-on-project-switch "2022-04-13")
+(defcustom dired-sidebar-refresh-on-project-switch t
+  "Refresh sidebar when `projectile' or `project' changes projects."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -496,7 +498,9 @@ Works around marker pointing to wrong buffer in Emacs 25."
   (when dired-sidebar-use-custom-modeline
     (dired-sidebar-set-mode-line))
 
-  (when dired-sidebar-refresh-on-projectile-switch
+  (when dired-sidebar-refresh-on-project-switch
+    (advice-add 'project-find-file
+                :after #'dired-sidebar-follow-file)
     (add-hook 'projectile-after-switch-project-hook
               #'dired-sidebar-follow-file))
 
@@ -935,7 +939,7 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
         (ignore auto-revert-verbose) ;; Make byte compiler happy.
         (revert-buffer)))))
 
-(defun dired-sidebar-follow-file ()
+(defun dired-sidebar-follow-file (&rest _)
   "Follow new file.
 
 The root of the sidebar will be determined by `dired-sidebar-get-dir-to-show'
