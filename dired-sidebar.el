@@ -810,7 +810,15 @@ the relevant file-directory clicked on by the mouse."
     ;; `projectile' is a big package and takes a while to load so it's better
     ;; to defer loading it as long as possible (until the user chooses).
     (dired-sidebar-if-let* ((pr (project-current)))
-        (project-root pr)
+        ;; It can happen, at least in Emacs 27.1, that
+        ;; `project-current` give a non-nil result, while
+        ;; `project-root` is undefined. Fallback to assuming that the
+        ;; directory part of `project-current` is the root. See
+        ;; https://github.com/jojojames/dired-sidebar/issues/73 for
+        ;; more details.
+        (if (fboundp 'project-root)
+            (project-root pr)
+          (cdr pr))
       default-directory)))
 
 (defun dired-sidebar-buffer-name (dir)
