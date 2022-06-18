@@ -36,8 +36,9 @@
 
 (require 'dired)
 (require 'dired-subtree)
-(require 'face-remap)
 (eval-when-compile (require 'subr-x)) ; `if-let*' and `when-let*'
+
+(declare-function buffer-face-mode-invoke "face-remap")
 
 ;; Compatibility
 
@@ -863,8 +864,9 @@ the relevant file-directory clicked on by the mouse."
 
 Set font to a variable width (proportional) in the current buffer."
   (interactive)
+  (require 'face-remap)
   (setq-local buffer-face-mode-face 'dired-sidebar-face)
-  (buffer-face-mode))
+  (buffer-face-mode-invoke 'variable-pitch t))
 
 (defun dired-sidebar-set-mode-line ()
   "Customize modeline in `dired-sidebar'."
@@ -1070,7 +1072,8 @@ This is somewhat experimental/hacky."
 (defun dired-sidebar-advice-hide-temporarily (f &rest args)
   "A function meant to be used with advice to temporarily hide itself.
 
-This function hides the sidebar before executing F and then reshows itself after."
+This function hides the sidebar before executing F and then reshows itself
+after."
   (if (not (dired-sidebar-showing-sidebar-p))
       (apply f args)
     (let ((sidebar (dired-sidebar-buffer)))
