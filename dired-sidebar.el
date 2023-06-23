@@ -1145,7 +1145,7 @@ after."
                         (if (dired-subtree--is-expanded-p)
                             (insert (concat collapsible-icon " "))
                           (insert (concat expandable-icon " ")))
-                      (insert "")))))))
+                      (insert (if (eq dired-sidebar-theme 'nerd) "  " ""))))))))
           (forward-line 1))))))
 
 (defun dired-sidebar-tui-update-with-delay (&rest _)
