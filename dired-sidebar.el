@@ -6,7 +6,7 @@
 ;; Maintainer: James Nguyen <james@jojojames.com>
 ;; URL: https://github.com/jojojames/dired-sidebar
 ;; Version: 0.0.1
-;; Package-Requires: ((emacs "25.1") (dired-subtree "0.0.1"))
+;; Package-Requires: ((emacs "25.1") (dired-subtree "0.0.1") (compat "30.0.0.0"))
 ;; Keywords: dired, files, tools
 ;; HomePage: https://github.com/jojojames/dired-sidebar
 
@@ -34,24 +34,12 @@
 
 ;;; Code:
 
+(require 'compat)
 (require 'dired)
 (require 'dired-subtree)
 (eval-when-compile (require 'subr-x)) ; `if-let*' and `when-let*'
 
 (declare-function buffer-face-mode-invoke "face-remap")
-
-;; Compatibility
-
-(eval-and-compile
-  (with-no-warnings
-    (if (version< emacs-version "26")
-        (progn
-          (defalias 'dired-sidebar-if-let* #'if-let)
-          (defalias 'dired-sidebar-when-let* #'when-let)
-          (function-put #'dired-sidebar-if-let* 'lisp-indent-function 2)
-          (function-put #'dired-sidebar-when-let* 'lisp-indent-function 1))
-      (defalias 'dired-sidebar-if-let* #'if-let*)
-      (defalias 'dired-sidebar-when-let* #'when-let*))))
 
 ;; Customizations
 
@@ -693,7 +681,7 @@ This is dependent on `dired-subtree-cycle'."
 (defun dired-sidebar-hide-sidebar ()
   "Hide the sidebar in the selected frame."
   (interactive)
-  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer)))
+  (when-let* ((buffer (dired-sidebar-buffer)))
     (delete-window (get-buffer-window buffer))
     (dired-sidebar-update-state nil)))
 
@@ -837,7 +825,7 @@ the relevant file-directory clicked on by the mouse."
     ;; Use `project' if `projectile' is not loaded yet.
     ;; `projectile' is a big package and takes a while to load so it's better
     ;; to defer loading it as long as possible (until the user chooses).
-    (dired-sidebar-if-let* ((pr (project-current)))
+    (if-let* ((pr (project-current)))
         ;; It can happen, at least in Emacs 27.1, that
         ;; `project-current` give a non-nil result, while
         ;; `project-root` is undefined. Fallback to assuming that the
@@ -865,7 +853,7 @@ the relevant file-directory clicked on by the mouse."
   "Get or create a `dired-sidebar' buffer matching ROOT."
   (interactive)
   (let ((name (dired-sidebar-buffer-name root)))
-    (dired-sidebar-if-let* ((existing-buffer (get-buffer name)))
+    (if-let* ((existing-buffer (get-buffer name)))
         existing-buffer
       (let ((buffer (dired-noselect root)))
         ;; When opening a sidebar while in a dired buffer that matches
@@ -929,7 +917,7 @@ Check if F or selected frame contains a sidebar and return
 corresponding buffer if buffer has a window attached to it.
 
 Return buffer if so."
-  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer f)))
+  (when-let* ((buffer (dired-sidebar-buffer f)))
     (get-buffer-window buffer)))
 
 (defun dired-sidebar-buffer (&optional f)
@@ -993,7 +981,7 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 
 (defun dired-sidebar-refresh-buffer (&rest _)
   "Refresh sidebar buffer."
-  (dired-sidebar-when-let* ((sidebar (dired-sidebar-buffer)))
+  (when-let* ((sidebar (dired-sidebar-buffer)))
     (with-current-buffer sidebar
       (let ((auto-revert-verbose nil))
         (ignore auto-revert-verbose) ;; Make byte compiler happy.
@@ -1015,7 +1003,7 @@ both accounting for the currently selected window."
       (let ((root (dired-sidebar-get-dir-to-show)))
         (dired-sidebar-switch-to-dir root)
         (when dired-sidebar-follow-file-at-point-on-toggle-open
-          (dired-sidebar-when-let* ((file (dired-sidebar-get-file-to-show)))
+          (when-let* ((file (dired-sidebar-get-file-to-show)))
             (dired-sidebar-point-at-file file root)))))))
 
 (defun dired-sidebar-default-alternate-select-window ()
@@ -1042,8 +1030,8 @@ both accounting for the currently selected window."
           (ibuffer-current-buffer))
      (let ((buffer-at-point (ibuffer-current-buffer)))
        (if (fboundp 'ibuffer-projectile-root)
-           (dired-sidebar-if-let* ((ibuffer-projectile-root
-                                    (ibuffer-projectile-root buffer-at-point)))
+           (if-let* ((ibuffer-projectile-root
+                      (ibuffer-projectile-root buffer-at-point)))
                (cdr ibuffer-projectile-root)
              (with-current-buffer buffer-at-point
                default-directory))
@@ -1197,7 +1185,7 @@ Otherwise, try to call `dired-omit-mode' after function runs."
 
 (defun dired-sidebar-tui-update ()
   "Workhorse function to update tui interface."
-  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer)))
+  (when-let* ((buffer (dired-sidebar-buffer)))
     (with-current-buffer buffer
       (dired-sidebar-revert)
       (when dired-sidebar-recenter-cursor-on-tui-update
@@ -1205,8 +1193,8 @@ Otherwise, try to call `dired-omit-mode' after function runs."
 
 (defun dired-sidebar-revert (&rest _)
   "Wrapper around `dired-revert' but saves window position."
-  (dired-sidebar-when-let* ((window (get-buffer-window
-                                     (dired-sidebar-buffer))))
+  (when-let* ((window (get-buffer-window
+                       (dired-sidebar-buffer))))
     (with-selected-window window
       (let ((old-window-start (window-start)))
         (when (dired-sidebar-using-tui-p)
@@ -1216,7 +1204,7 @@ Otherwise, try to call `dired-omit-mode' after function runs."
 
 (defun dired-sidebar-tui-reset-in-sidebar (&rest _)
   "Runs `dired-sidebar-tui-dired-reset' in current `dired-sidebar' buffer."
-  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer)))
+  (when-let* ((buffer (dired-sidebar-buffer)))
     (with-current-buffer buffer
       (dired-sidebar-tui-dired-reset))))
 
