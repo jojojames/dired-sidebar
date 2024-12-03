@@ -716,7 +716,7 @@ If it's not showing, act as `dired-sidebar-toggle-sidebar'."
 
 (defun dired-sidebar-find-file (&optional dir)
   "Wrapper over `dired-find-file'.
-Optional argument DIR Fine file using DIR of available.
+Optional argument DIR: Find file using DIR if available.
 
 With prefix argument, use `dired-sidebar-alternate-select-window-function' for
 window selection."
