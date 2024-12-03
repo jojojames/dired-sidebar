@@ -1143,12 +1143,11 @@ after."
 
 If `dired-omit-mode' is null, the user isn't interested, so continue as normal.
 Otherwise, try to call `dired-omit-mode' after function runs."
-  (if (fboundp 'dired-omit-mode)
-      (if (null dired-omit-mode)
-          (apply f args)
-        (let ((result (apply f args)))
-          (dired-omit-mode)
-          result))
+  (if (and (fboundp 'dired-omit-mode)
+           (bound-and-true-p dired-omit-mode))
+      (let ((result (apply f args)))
+        (dired-omit-mode)
+        result)
     (apply f args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
