@@ -351,12 +351,6 @@ See https://github.com/jojojames/dired-sidebar/issues/43."
 
 ;; Internal
 
-(defvar dired-sidebar-basedir (file-name-directory load-file-name)
-  "Store the directory dired-sidebar.el was loaded from.")
-
-(defvar dired-sidebar-icons-dir (format "%sicons/" dired-sidebar-basedir)
-  "Store the icons directory of `dired-sidebar'.")
-
 (defvar dired-sidebar-alist '()
   "An alist that maps from frame to currently opened `dired-sidebar' buffer.")
 
