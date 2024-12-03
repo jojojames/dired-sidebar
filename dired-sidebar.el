@@ -311,11 +311,6 @@ a file."
   :type 'boolean
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-icon-scale .18
-  "The scale of icons \(currently only applies to vscode theme.\)."
-  :type 'number
-  :group 'dired-sidebar)
-
 (defcustom dired-sidebar-no-delete-other-windows nil
   "Whether or not to add `no-delete-other-window' parameter to window.
 
@@ -325,7 +320,6 @@ will continue showing.
 For more information, look up `delete-other-windows'."
   :type 'boolean
   :group 'dired-sidebar)
-
 
 (defcustom dired-sidebar-use-one-instance nil
   "Only show one buffer instance for dired-sidebar for each frame."
