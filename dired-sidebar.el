@@ -164,6 +164,14 @@ When finding root directory for sidebar, use directory specified by `magit'."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-use-omit-mode-integration t
+  "Whether to integrate with `dired-omit-mode'.
+
+When true: Attempt to handle `dired-omit-mode' around
+`dired-subtree-cycle' and `dired-subtree-toggle'."
+  :type 'boolean
+  :group 'dired-sidebar)
+
 (defcustom dired-sidebar-use-term-integration nil
   "Whether to integrate with `term-mode'.
 
@@ -525,6 +533,15 @@ Works around marker pointing to wrong buffer in Emacs 25."
           (run-with-idle-timer
            dired-sidebar-follow-file-idle-delay
            t #'dired-sidebar-follow-file)))
+
+  (when dired-sidebar-use-omit-mode-integration
+    (unless (memq 'dired-omit-mode
+                  dired-sidebar-special-refresh-commands)
+      (push 'dired-omit-mode dired-sidebar-special-refresh-commands))
+    (advice-add 'dired-subtree-cycle
+                :around 'dired-sidebar-omit-after-dired-subtree-cycle)
+    (advice-add 'dired-subtree-toggle
+                :around 'dired-sidebar-omit-after-dired-subtree-cycle))
 
   ;; This comment is taken from `dired-readin'.
   ;; Begin --- Copied comment from dired.el.
@@ -1104,6 +1121,20 @@ after."
                ;; since we made it buffer local earlier.
                (not (memq mode (default-value 'dired-mode-hook))))
              dired-sidebar-block-icon-display-modes)))
+
+(defvar dired-omit-mode)
+(defun dired-sidebar-omit-after-dired-subtree-cycle (f &rest args)
+  "Attempt to handle `dired-omit-mode' when applying F.
+
+If `dired-omit-mode' is null, the user isn't interested, so continue as normal.
+Otherwise, try to call `dired-omit-mode' after function runs."
+  (if (fboundp 'dired-omit-mode)
+      (if (null dired-omit-mode)
+          (apply f args)
+        (let ((result (apply f args)))
+          (dired-omit-mode)
+          result))
+    (apply f args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
