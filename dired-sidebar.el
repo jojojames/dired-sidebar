@@ -108,13 +108,15 @@ This only takes effect if on a local connection. (e.g. Not Tramp)"
 (defcustom dired-sidebar-width 35
   "Width of the `dired-sidebar' buffer.
 This option does not have effect if `dired-sidebar-resize-on-open' is nil.
-If you set `dired-sidebar-resize-on-open' to nil, you can customize `dired-sidebar-display-alist'
+If you set `dired-sidebar-resize-on-open' to nil, you can customize
+`dired-sidebar-display-alist'
 to control the width anyway."
   :type 'integer
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar-window-fixed 'width
-  "Whether the width or height of the sidebar window should be fixed (to prevent from resizing)."
+  "Whether the width or height of the sidebar window should be fixed
+(to prevent from resizing)."
   :type '(choice (const nil)
                  (const width)
                  (const height))
@@ -280,7 +282,8 @@ with a prefix arg or when `dired-sidebar-find-file-alt' is called."
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar-resize-on-open t
-  "When dired sidebar window is showed, automatically adjust its width according to `dired-sidebar-width'"
+  "When dired sidebar window is showed, automatically adjust its width
+according to `dired-sidebar-width'"
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -307,7 +310,7 @@ with a prefix arg or when `dired-sidebar-find-file-alt' is called."
 (defcustom dired-sidebar-display-alist '((side . left) (slot . -1))
   "Alist used in `display-buffer-in-side-window'.
 
-e.g. (display-buffer-in-side-window buffer '((side . left) (slot . -1)))"
+e.g. (display-buffer-in-side-window buffer \\'((side . left) (slot . -1)))"
   :type 'alist
   :group 'dired-sidebar)
 
