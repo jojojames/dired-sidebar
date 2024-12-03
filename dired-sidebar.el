@@ -943,7 +943,13 @@ Return buffer if so."
 
 This can return nil if the buffer has been killed."
   (let* ((frame (or f (selected-frame)))
-         (buffer (alist-get frame dired-sidebar-alist)))
+         (buffer
+          (or
+           ;; FIXME: I think we can remove all the `dired-sidebar-alist'
+           ;; just checking against this window list instead.
+           ;; Add this here for now, revisit later if it seems stable.
+           (dired-sidebar-get-buffer-from-window-list)
+           (alist-get frame dired-sidebar-alist))))
     ;; The buffer can be killed for a variety of reasons.
     ;; This side effect is kind of messy but it's the simplest place
     ;; to put the clean up code for `dired-sidebar-alist'.
@@ -960,6 +966,18 @@ This can return nil if the buffer has been killed."
       (setq dired-sidebar-alist
             (assq-delete-all frame dired-sidebar-alist))
       nil)))
+
+(defun dired-sidebar-get-buffer-from-window-list ()
+  "Return the current sidebar buffer using `window-list'."
+  (if-let* ((windows
+             (seq-filter
+              (lambda (window)
+                (with-current-buffer (window-buffer window)
+                  (eq major-mode 'dired-sidebar-mode)))
+              (window-list)))
+            (buffer (window-buffer (car windows))))
+      buffer
+    nil))
 
 (defun dired-sidebar-switch-to-dir (dir)
   "Update buffer with DIR as root."
