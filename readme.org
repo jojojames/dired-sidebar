@@ -123,7 +123,16 @@
    Take a look at ~dired-sidebar-refresh-on-special-commands~ and
    ~dired-sidebar-special-refresh-commands~ for more configuration.
 ** All The Icons
-   Uses [[https://github.com/jtbm37/all-the-icons-dired][all-the-icons]] for icons.
+   Can use [[https://github.com/jtbm37/all-the-icons-dired][all-the-icons]] for icons.
+** Nerd Icons
+Can use [[https://github.com/rainstormstudio/nerd-icons-dired][nerd-icons]].
+
+#+begin_src emacs-lisp :tangle yes
+(use-package nerd-icons :defer t)
+(use-package nerd-icons-dired
+  :commands (nerd-icons-dired-mode))
+(setq dired-sidebar-theme 'nerd-icons)
+#+end_src
 ** Terminal Support
    Icons will be replaced with "+" and "-" to indicate folder nesting in terminals.
 ** Evil

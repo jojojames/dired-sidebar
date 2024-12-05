@@ -82,14 +82,16 @@ This uses format specified by `dired-sidebar-mode-line-format'."
 it is suitable for terminal.
 `icons' use `all-the-icons'.
 `nerd' use the nerdtree indentation mode and arrow.
+`nerd-icons' uses https://github.com/ryanoasis/nerd-fonts
 `none' use no theme.
 `vscode' use `vscode' icons.
 
 This only takes effect if on a local connection. (e.g. Not Tramp)"
   :group 'dired-sidebar
   :type '(choice (const ascii)
-                 (const icons)
+                 (const icons) ;; https://github.com/jtbm37/all-the-icons-dired
                  (const nerd)
+                 (const nerd-icons) ;; https://github.com/rainstormstudio/nerd-icons.el
                  (const none)
                  (const vscode)))
 
@@ -550,6 +552,13 @@ Works around marker pointing to wrong buffer in Emacs 25."
             (autoloadp (symbol-function 'all-the-icons-dired-mode))))
       (with-no-warnings
         (all-the-icons-dired-mode)))
+     ((and (eq dired-sidebar-theme 'nerd-icons)
+           (display-graphic-p)
+           (or
+            (fboundp 'nerd-icons-dired-mode)
+            (autoloadp (symbol-function 'nerd-icons-dired-mode))))
+      (with-no-warnings
+        (nerd-icons-dired-mode)))
      (:default :no-theme))))
 
 ;; User Interface
@@ -1045,13 +1054,20 @@ This is somewhat experimental/hacky."
 (defun dired-sidebar-redisplay-icons ()
   "Redisplay icon themes unless over TRAMP."
   (when (dired-sidebar-can-display-icons)
-    (when (and (eq dired-sidebar-theme 'icons)
-               (fboundp 'all-the-icons-dired--refresh))
+    (cond
+     ((and (eq dired-sidebar-theme 'icons)
+           (fboundp 'all-the-icons-dired--refresh))
       ;; Refresh `all-the-icons-dired'.
       (dired-sidebar-revert)
       (all-the-icons-dired--refresh))
-    (when (dired-sidebar-using-tui-p)
-      (dired-sidebar-tui-update-with-delay))))
+     ((and (eq dired-sidebar-theme 'nerd-icons)
+           (fboundp 'nerd-icons-dired--refresh))
+      ;; Refresh `nerd-icons-dired'.
+      (dired-sidebar-revert)
+      (nerd-icons-dired--refresh))
+     ((dired-sidebar-using-tui-p)
+      (dired-sidebar-tui-update-with-delay))
+     (:default nil))))
 
 (defun dired-sidebar-advice-hide-temporarily (f &rest args)
   "A function meant to be used with advice to temporarily hide itself.
