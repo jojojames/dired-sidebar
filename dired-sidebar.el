@@ -339,9 +339,6 @@ See https://github.com/jojojames/dired-sidebar/issues/43."
 
 ;; Internal
 
-(defvar dired-sidebar-alist '()
-  "An alist that maps from frame to currently opened `dired-sidebar' buffer.")
-
 (defvar-local dired-sidebar-stale-buffer-timer nil
   "Timer used for setting `dired-sidebar-check-for-stale-buffer-p'.
 
@@ -538,7 +535,6 @@ Works around marker pointing to wrong buffer in Emacs 25."
 
   (dired-unadvertise (dired-current-directory))
   (dired-sidebar-update-buffer-name)
-  (dired-sidebar-update-state (current-buffer))
 
   ;; Move setting theme until the end after `dired-sidebar' has set up
   ;; its directory structure.
@@ -674,16 +670,14 @@ This is dependent on `dired-subtree-cycle'."
     (with-current-buffer buffer
       (if (eq major-mode 'dired-sidebar-mode)
           (dired-build-subdir-alist)
-        (dired-sidebar-mode)))
-    (dired-sidebar-update-state buffer)))
+        (dired-sidebar-mode)))))
 
 ;;;###autoload
 (defun dired-sidebar-hide-sidebar ()
   "Hide the sidebar in the selected frame."
   (interactive)
   (when-let* ((buffer (dired-sidebar-buffer)))
-    (delete-window (get-buffer-window buffer))
-    (dired-sidebar-update-state nil)))
+    (delete-window (get-buffer-window buffer))))
 
 ;;;###autoload
 (defun dired-sidebar-jump-to-sidebar ()
@@ -715,15 +709,12 @@ window selection."
          (let ((buf-name (dired-sidebar-buffer-name
                           dired-file-name)))
            (if (dired-sidebar-buffer-exists-p buf-name)
-               (progn
-                 (switch-to-buffer buf-name)
-                 (dired-sidebar-update-state (current-buffer)))
+               (switch-to-buffer buf-name)
              (if (and dired-sidebar-use-one-instance (file-directory-p dired-file-name))
                  (find-alternate-file dired-file-name)
                ;; Copied from `dired-find-file'.
                (find-file dired-file-name))
-             (dired-sidebar-mode)
-             (dired-sidebar-update-state (current-buffer)))))
+             (dired-sidebar-mode))))
       ;; Select the sidebar window so that `next-window' is consistent
       ;; in picking the window next to the sidebar.
       ;; This is useful for when `dired-sidebar-find-file' is called
@@ -765,14 +756,11 @@ Select alternate window using `dired-sidebar-alternate-select-window-function'."
           (up (file-name-directory (directory-file-name dir)))
           (up-name (dired-sidebar-buffer-name up)))
      (if (dired-sidebar-buffer-exists-p up-name)
-         (progn
-           (switch-to-buffer up-name)
-           (dired-sidebar-update-state (current-buffer)))
+         (switch-to-buffer up-name)
        (if dired-sidebar-use-one-instance
            (find-alternate-file "..")
          (dired-up-directory))
-       (dired-sidebar-mode)
-       (dired-sidebar-update-state (current-buffer)))
+       (dired-sidebar-mode))
      (let ((default-directory up))
        (dired-goto-file dir)))))
 
@@ -903,13 +891,6 @@ Set font to a variable width (proportional) in the current buffer."
   (rename-buffer
    (dired-sidebar-buffer-name (dired-current-directory))))
 
-(defun dired-sidebar-update-state (buffer &optional f)
-  "Update current state with BUFFER for sidebar in F or selected frame."
-  (let ((frame (or f (selected-frame))))
-    (if (assq frame dired-sidebar-alist)
-        (setcdr (assq frame dired-sidebar-alist) buffer)
-      (push `(,frame . ,buffer) dired-sidebar-alist))))
-
 (defun dired-sidebar-showing-sidebar-p (&optional f)
   "Whether F or selected frame is showing a sidebar.
 
@@ -920,36 +901,7 @@ Return buffer if so."
   (when-let* ((buffer (dired-sidebar-buffer f)))
     (get-buffer-window buffer)))
 
-(defun dired-sidebar-buffer (&optional f)
-  "Return the current sidebar buffer in F or selected frame.
-
-This can return nil if the buffer has been killed."
-  (let* ((frame (or f (selected-frame)))
-         (buffer
-          (or
-           ;; FIXME: I think we can remove all the `dired-sidebar-alist'
-           ;; just checking against this window list instead.
-           ;; Add this here for now, revisit later if it seems stable.
-           (dired-sidebar-get-buffer-from-window-list)
-           (alist-get frame dired-sidebar-alist))))
-    ;; The buffer can be killed for a variety of reasons.
-    ;; This side effect is kind of messy but it's the simplest place
-    ;; to put the clean up code for `dired-sidebar-alist'.
-    (if (buffer-live-p buffer)
-        buffer
-      ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Association-Lists.html
-      ;; Documentation for `assq-delete-all'.
-      ;; What kind of API is this?? :()
-      ;; Why does it only modify 'often' and not 'always'? ¯\_(ツ)_/¯
-      ;; It returns the shortened alist, and often modifies the original list
-      ;; structure of alist.
-      ;; For correct results, use the return value of assq-delete-all rather
-      ;; than looking at the saved value of alist.
-      (setq dired-sidebar-alist
-            (assq-delete-all frame dired-sidebar-alist))
-      nil)))
-
-(defun dired-sidebar-get-buffer-from-window-list ()
+(defun dired-sidebar-buffer (&optional _frame)
   "Return the current sidebar buffer using `window-list'."
   (if-let* ((windows
              (seq-filter
