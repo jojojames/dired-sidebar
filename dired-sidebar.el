@@ -1221,7 +1221,7 @@ This is an exact copy of `wdired-change-to-dired-mode' but changes the
     (remove-text-properties
      (point-min) (point-max)
      '(front-sticky nil rear-nonsticky nil read-only nil keymap nil)))
-  (use-local-map dired-mode-map)
+  (use-local-map dired-sidebar-mode-map)
   (force-mode-line-update)
   (setq buffer-read-only t)
   (setq major-mode 'dired-sidebar-mode)
