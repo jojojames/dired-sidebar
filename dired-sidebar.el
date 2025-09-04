@@ -40,6 +40,8 @@
 (eval-when-compile (require 'subr-x)) ; `if-let*' and `when-let*'
 
 (declare-function buffer-face-mode-invoke "face-remap")
+(declare-function dired-filter-mode "dired-filter")
+(defvar dired-filter-stack)
 
 ;; Customizations
 
@@ -161,6 +163,15 @@ When finding root directory for sidebar, use directory specified by `magit'."
 
 When true: Attempt to handle `dired-omit-mode' around
 `dired-subtree-cycle' and `dired-subtree-toggle'."
+  :type 'boolean
+  :group 'dired-sidebar)
+
+(defcustom dired-sidebar-use-dired-filter-integration (featurep 'dired-filter)
+  "Whether to integrate with `dired-filter'.
+
+When true and `dired-filter' is installed, automatically add
+`git-ignored' to `dired-filter-stack' for directories under Git
+version control."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -544,6 +555,15 @@ Works around marker pointing to wrong buffer in Emacs 25."
 
   (dired-unadvertise (dired-current-directory))
   (dired-sidebar-update-buffer-name)
+
+  ;; If current directory is under Git version control, ensure that
+  ;; `git-ignored' is included in `dired-filter-stack'.
+  (when (and dired-sidebar-use-dired-filter-integration
+             (featurep 'dired-filter)
+             (eq (vc-responsible-backend (dired-current-directory) t) 'Git)
+             (not (seq-find (lambda (s) (eq (car s) 'git-ignored)) dired-filter-stack)))
+    (setq-local dired-filter-stack `(,@dired-filter-stack (git-ignored)))
+    (dired-filter-mode +1))
 
   ;; Move setting theme until the end after `dired-sidebar' has set up
   ;; its directory structure.
