@@ -339,6 +339,14 @@ See https://github.com/jojojames/dired-sidebar/issues/43."
   :type 'hook
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-adjust-frame-width nil
+  "Whether or not to change the frame size when showing and hiding the sidebar.
+
+This has other windows retain their size."
+  :type 'boolean
+  :group 'dired-sidebar
+  )
+
 ;; Internal
 
 (defvar-local dired-sidebar-stale-buffer-timer nil
@@ -675,7 +683,11 @@ This is dependent on `dired-subtree-cycle'."
       (when dired-sidebar-resize-on-open
         (with-selected-window window
           (let ((window-size-fixed))
-            (dired-sidebar-set-width dired-sidebar-width)))))
+            (dired-sidebar-set-width dired-sidebar-width))))
+      (when dired-sidebar-adjust-frame-width
+        (let ((frame (window-frame window)))
+          (set-frame-width frame (+ (frame-width frame)
+                                    (window-total-width window))))))
     (with-current-buffer buffer
       (if (eq major-mode 'dired-sidebar-mode)
           (dired-build-subdir-alist)
@@ -685,8 +697,13 @@ This is dependent on `dired-subtree-cycle'."
 (defun dired-sidebar-hide-sidebar ()
   "Hide the sidebar in the selected frame."
   (interactive)
-  (when-let* ((buffer (dired-sidebar-buffer)))
-    (delete-window (get-buffer-window buffer))))
+  (when-let* ((buffer (dired-sidebar-buffer))
+              (window (get-buffer-window buffer)))
+    (when dired-sidebar-adjust-frame-width
+        (let ((frame (window-frame window)))
+          (set-frame-width frame (- (frame-width frame)
+                                    (window-total-width window)))))
+    (delete-window window)))
 
 ;;;###autoload
 (defun dired-sidebar-jump-to-sidebar ()
