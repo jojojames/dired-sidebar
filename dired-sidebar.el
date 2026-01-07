@@ -1035,7 +1035,7 @@ This is somewhat experimental/hacky."
           (term-previous-prompt 1))
         (when (fboundp 'term-simple-send)
           (term-simple-send (get-buffer-process (current-buffer)) "pwd"))
-        (sleep-for 0 50)
+        (sleep-for 0.05)
         (forward-line 1)
         (let ((result (string-trim (thing-at-point 'line))))
           (kill-whole-line)
