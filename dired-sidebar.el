@@ -73,7 +73,7 @@ This uses format specified by `dired-sidebar-mode-line-format'."
     mode-line-buffer-identification
     " "  mode-line-end-spaces)
   "Mode line format for `dired-sidebar'."
-  :type 'list
+  :type 'sexp
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar-theme 'icons
@@ -241,7 +241,7 @@ to wait to refresh the sidebar after the CAR of the alist is called.
 
 Set this to nil or set `dired-sidebar-refresh-on-special-commands' to nil
 to disable automatic refresh when a special command is triggered."
-  :type 'list
+  :type '(repeat (choice symbol (cons symbol integer)))
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar-toggle-hidden-commands
@@ -254,7 +254,7 @@ command is completed.
 This functionality is implemented using advice.
 
 Set this to nil to disable this advice."
-  :type 'list
+  :type 'hook
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar-alternate-select-window-function
@@ -336,7 +336,7 @@ For more information, look up `delete-other-windows'."
   "List of modes in `dired-mode-hook' that prevents icon display.
 
 See https://github.com/jojojames/dired-sidebar/issues/43."
-  :type 'list
+  :type 'hook
   :group 'dired-sidebar)
 
 ;; Internal
