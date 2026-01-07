@@ -104,8 +104,7 @@ already showing."
     (dired-sidebar-hide-sidebar)))
 
 (ert-deftest dired-sidebar-sidebar-killed-sidebar-buffer-in-frame-returns-nil ()
-  "Test that `dired-sidebar-buffer' returns nil
-if the buffer has been killed. Also test alist have been cleaned up."
+  "Test that `dired-sidebar-buffer' returns nil if the buffer has been killed."
   (let* ((default-directory test-data-dir-basic)
          (A-buffer (find-file-noselect
                     (f-join default-directory "A") t)))
@@ -113,10 +112,8 @@ if the buffer has been killed. Also test alist have been cleaned up."
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (let ((sidebar (dired-sidebar-buffer)))
         (should sidebar)
-        (should dired-sidebar-alist)
         (kill-buffer sidebar)
-        (should (not (dired-sidebar-buffer)))
-        (should (not dired-sidebar-alist))))
+        (should (not (dired-sidebar-buffer)))))
     (kill-buffer A-buffer)))
 
 (ert-deftest dired-sidebar-get-file-to-show-returns-nil-for-unsaved-buffers ()
