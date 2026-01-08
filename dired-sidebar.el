@@ -686,8 +686,9 @@ This is dependent on `dired-subtree-cycle'."
             (dired-sidebar-set-width dired-sidebar-width))))
       (when dired-sidebar-adjust-frame-width
         (let ((frame (window-frame window)))
-          (set-frame-width frame (+ (frame-width frame)
-                                    (window-total-width window))))))
+          (unless (frame-parameter frame 'fullscreen)
+            (set-frame-width frame (+ (frame-width frame)
+                                      (window-total-width window)))))))
     (with-current-buffer buffer
       (if (eq major-mode 'dired-sidebar-mode)
           (dired-build-subdir-alist)
@@ -701,8 +702,9 @@ This is dependent on `dired-subtree-cycle'."
               (window (get-buffer-window buffer)))
     (when dired-sidebar-adjust-frame-width
         (let ((frame (window-frame window)))
-          (set-frame-width frame (- (frame-width frame)
-                                    (window-total-width window)))))
+          (unless (frame-parameter frame 'fullscreen)
+            (set-frame-width frame (- (frame-width frame)
+                                      (window-total-width window))))))
     (delete-window window)))
 
 ;;;###autoload
