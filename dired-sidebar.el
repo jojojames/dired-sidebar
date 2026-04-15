@@ -344,8 +344,7 @@ See https://github.com/jojojames/dired-sidebar/issues/43."
 
 This has other windows retain their size."
   :type 'boolean
-  :group 'dired-sidebar
-  )
+  :group 'dired-sidebar)
 
 ;; Internal
 
@@ -667,6 +666,16 @@ This is dependent on `dired-subtree-cycle'."
   (let ((current-prefix-arg '(4))) ; C-u
     (call-interactively #'dired-sidebar-toggle-sidebar)))
 
+(defun dired-sidebar-maybe-adjust-frame-width (window &optional dec)
+  "If needed, increase (or decrease, if DEC is non-nil) the enclosing 
+frame width to accomodate for the sidebar."  
+  (when dired-sidebar-adjust-frame-width
+    (let ((frame (window-frame window)))
+      (unless (frame-parameter frame 'fullscreen)
+        (set-frame-width frame (funcall (if dec '- '+)
+                                        (frame-width frame)
+                                        (window-total-width window)))))))  
+
 ;;;###autoload
 (defun dired-sidebar-show-sidebar (&optional b)
   "Show sidebar displaying buffer B."
@@ -684,11 +693,7 @@ This is dependent on `dired-subtree-cycle'."
         (with-selected-window window
           (let ((window-size-fixed))
             (dired-sidebar-set-width dired-sidebar-width))))
-      (when dired-sidebar-adjust-frame-width
-        (let ((frame (window-frame window)))
-          (unless (frame-parameter frame 'fullscreen)
-            (set-frame-width frame (+ (frame-width frame)
-                                      (window-total-width window)))))))
+      (dired-sidebar-maybe-adjust-frame-width window))
     (with-current-buffer buffer
       (if (eq major-mode 'dired-sidebar-mode)
           (dired-build-subdir-alist)
@@ -700,11 +705,7 @@ This is dependent on `dired-subtree-cycle'."
   (interactive)
   (when-let* ((buffer (dired-sidebar-buffer))
               (window (get-buffer-window buffer)))
-    (when dired-sidebar-adjust-frame-width
-        (let ((frame (window-frame window)))
-          (unless (frame-parameter frame 'fullscreen)
-            (set-frame-width frame (- (frame-width frame)
-                                      (window-total-width window))))))
+    (dired-sidebar-maybe-adjust-frame-width window t)         
     (delete-window window)))
 
 ;;;###autoload
