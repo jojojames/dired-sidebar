@@ -13,10 +13,10 @@
 ;;; Code:
 (require 'ert)
 
-;; FIXME: Adding `f' as a dependency just for this line.
-(require 'f)
-(let ((dired-sidebar-dir (f-parent (f-dirname (f-this-file)))))
-  (add-to-list 'load-path dired-sidebar-dir))
+(add-to-list 'load-path
+             (expand-file-name
+              ".." (file-name-directory
+                    (or load-file-name buffer-file-name))))
 (require 'dired-sidebar)
 
 ;;; test-helper.el ends here

@@ -2,17 +2,17 @@
 
 (require 'dired-sidebar)
 (require 'ert)
-(require 'f)
 (eval-when-compile (require 'subr-x))
 
 (defvar test-data-dir)
 (defvar test-data-dir-basic)
 
 ;; make runs the test starting from a parent directory.
-(setq test-data-dir (f-expand (if (string-match-p "/test/" default-directory)
-                                  "./data"
-                                "./test/data")))
-(setq test-data-dir-basic (f-join test-data-dir "basic"))
+(setq test-data-dir (expand-file-name
+                     (if (string-match-p "/test/" default-directory)
+                         "./data"
+                       "./test/data")))
+(setq test-data-dir-basic (expand-file-name "basic" test-data-dir))
 
 ;; https://github.com/rejeep/ert-runner.el/issues/24
 (with-no-warnings
@@ -20,7 +20,8 @@
     "..."
     (let ((message (apply #'format format args)))
       (if ert-runner-output-file
-          (f-append-text message 'utf-8 ert-runner-output-file)
+          (let ((coding-system-for-write 'utf-8))
+            (write-region message nil ert-runner-output-file t 'silent))
         (princ message t)))))
 
 (ert-deftest dired-sidebar-blank-test ()
@@ -32,7 +33,7 @@
 already showing."
   (let* ((default-directory test-data-dir-basic)
          (A-buffer (find-file-noselect
-                    (f-join default-directory "A") t)))
+                    (expand-file-name "A" default-directory) t)))
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (should (dired-sidebar-buffer)))
@@ -43,7 +44,7 @@ already showing."
   "Test `dired-sidebar-hide-sidebar' actually hides sidebar."
   (let* ((default-directory test-data-dir-basic)
          (A-buffer (find-file-noselect
-                    (f-join default-directory "A") t)))
+                    (expand-file-name "A" default-directory) t)))
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (should (equal (current-buffer)
@@ -57,7 +58,7 @@ already showing."
   (let* ((default-directory test-data-dir-basic)
          (dired-sidebar-pop-to-sidebar-on-toggle-open t)
          (A-buffer (find-file-noselect
-                    (f-join default-directory "A") t)))
+                    (expand-file-name "A" default-directory) t)))
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (should (equal (current-buffer)
@@ -75,7 +76,7 @@ already showing."
 `dired-sidebar-hide-sidebar' is called."
   (let ((default-directory test-data-dir-basic)
         (A-buffer (find-file-noselect
-                   (f-join default-directory "A") t)))
+                   (expand-file-name "A" default-directory) t)))
     (with-current-buffer A-buffer
       (let ((current-window-count (length (window-list))))
         (call-interactively 'dired-sidebar-hide-sidebar)
@@ -88,7 +89,7 @@ already showing."
   (let* ((default-directory test-data-dir-basic)
          (dired-sidebar-follow-file-at-point-on-toggle-open t)
          (A-buffer (find-file-noselect
-                    (f-join default-directory "A") t)))
+                    (expand-file-name "A" default-directory) t)))
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (should (string-suffix-p "A" (string-trim (thing-at-point 'line t))))
@@ -107,7 +108,7 @@ already showing."
   "Test that `dired-sidebar-buffer' returns nil if the buffer has been killed."
   (let* ((default-directory test-data-dir-basic)
          (A-buffer (find-file-noselect
-                    (f-join default-directory "A") t)))
+                    (expand-file-name "A" default-directory) t)))
     (with-current-buffer A-buffer
       (call-interactively 'dired-sidebar-toggle-sidebar)
       (let ((sidebar (dired-sidebar-buffer)))
@@ -122,7 +123,7 @@ buffer hasn't been saved yet."
   (let* ((default-directory test-data-dir-basic)
          (unsaved-buffer
           (find-file-noselect
-           (f-join default-directory "new-unsaved-file") t)))
+           (expand-file-name "new-unsaved-file" default-directory) t)))
     (with-current-buffer unsaved-buffer
       (should (not (dired-sidebar-get-file-to-show))))
     (kill-buffer unsaved-buffer)))
