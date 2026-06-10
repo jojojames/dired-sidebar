@@ -41,6 +41,7 @@
 
 (declare-function buffer-face-mode-invoke "face-remap")
 (declare-function dired-filter-mode "dired-filter")
+(declare-function dired-collapse-mode "ext:dired-collapse")
 (defvar dired-filter-stack)
 
 ;; Customizations
@@ -386,17 +387,25 @@ will check if buffer is stale through `auto-revert-mode'.")
 
 (defvar dired-sidebar-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "TAB") 'dired-sidebar-subtree-toggle)
-    (define-key map [tab] 'dired-sidebar-subtree-toggle)
-    (define-key map (kbd "C-m") 'dired-sidebar-find-file)
-    (define-key map (kbd "RET") 'dired-sidebar-find-file)
-    (define-key map (kbd "<return>") 'dired-sidebar-find-file)
-    (define-key map "^" 'dired-sidebar-up-directory)
-    (define-key map "-" 'dired-sidebar-up-directory)
-    (define-key map (kbd "C-o") 'dired-sidebar-find-file-alt)
-    (define-key map [mouse-2] 'dired-sidebar-mouse-subtree-cycle-or-find-file)
+    (define-key map (kbd "TAB") #'dired-sidebar-subtree-toggle)
+    (define-key map [tab] #'dired-sidebar-subtree-toggle)
+    (define-key map (kbd "C-m") #'dired-sidebar-find-file)
+    (define-key map (kbd "RET") #'dired-sidebar-find-file)
+    (define-key map (kbd "<return>") #'dired-sidebar-find-file)
+    (define-key map "^" #'dired-sidebar-up-directory)
+    (define-key map "-" #'dired-sidebar-up-directory)
+    (define-key map (kbd "C-o") #'dired-sidebar-find-file-alt)
+    (define-key map [mouse-2] #'dired-sidebar-mouse-subtree-cycle-or-find-file)
     map)
   "Keymap used for symbol `dired-sidebar-mode'.")
+
+(defun dired-sidebar-remember-hidden-hack (f &rest args)
+  "Return nil for `dired-remember-hidden'.
+
+Works around marker pointing to wrong buffer in Emacs 25."
+  (if (derived-mode-p 'dired-sidebar-mode)
+      nil
+    (apply f args)))
 
 (define-derived-mode dired-sidebar-mode dired-mode
   "Dired-sidebar"
@@ -408,27 +417,20 @@ will check if buffer is stale through `auto-revert-mode'.")
   ;; `dired-remember-hidden' in Emacs 25 (terminal?) seems to throw
   ;; an error upon calling `goto-char'.
   (when (<= emacs-major-version 25)
-    (defun dired-sidebar-remember-hidden-hack (f &rest args)
-      "Return nil for `dired-remember-hidden'.
-
-Works around marker pointing to wrong buffer in Emacs 25."
-      (if (eq major-mode 'dired-sidebar-mode)
-          nil
-        (apply f args)))
-    (advice-remove 'dired-remember-hidden 'dired-sidebar-remember-hidden-hack)
-    (advice-add 'dired-remember-hidden :around 'dired-sidebar-remember-hidden-hack))
+    (advice-remove 'dired-remember-hidden #'dired-sidebar-remember-hidden-hack)
+    (advice-add 'dired-remember-hidden :around #'dired-sidebar-remember-hidden-hack))
 
   ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=32392
   (when dired-sidebar-use-wdired-integration
     (advice-remove 'wdired-change-to-dired-mode
-                   'dired-sidebar-wdired-change-to-dired-mode-advice)
+                   #'dired-sidebar-wdired-change-to-dired-mode-advice)
     (advice-remove 'wdired-change-to-wdired-mode
-                   'dired-sidebar-wdired-change-to-wdired-mode-advice)
+                   #'dired-sidebar-wdired-change-to-wdired-mode-advice)
 
     (advice-add 'wdired-change-to-dired-mode
-                :around 'dired-sidebar-wdired-change-to-dired-mode-advice)
+                :around #'dired-sidebar-wdired-change-to-dired-mode-advice)
     (advice-add 'wdired-change-to-wdired-mode
-                :around 'dired-sidebar-wdired-change-to-wdired-mode-advice))
+                :around #'dired-sidebar-wdired-change-to-wdired-mode-advice))
 
   (setq window-size-fixed dired-sidebar-window-fixed)
 
@@ -447,8 +449,9 @@ Works around marker pointing to wrong buffer in Emacs 25."
   ;; This needs to be set to nil before `dired-hide-details-mode' is called.
   (setq-local dired-hide-details-hide-symlink-targets nil)
 
-  ;; Use `dired-sidebar-revert' instead that wraps `dired-revert'.
-  (setq-local revert-buffer-function 'dired-sidebar-revert)
+  ;; Wrap `revert-buffer-function' to preserve window position.
+  (add-function :around (local 'revert-buffer-function)
+                #'dired-sidebar--revert)
 
   ;; We don't want extra details in the sidebar.
   (dired-hide-details-mode)
@@ -541,9 +544,9 @@ Works around marker pointing to wrong buffer in Emacs 25."
                   dired-sidebar-special-refresh-commands)
       (push 'dired-omit-mode dired-sidebar-special-refresh-commands))
     (advice-add 'dired-subtree-cycle
-                :around 'dired-sidebar-omit-after-dired-subtree-cycle)
+                :around #'dired-sidebar-omit-after-dired-subtree-cycle)
     (advice-add 'dired-subtree-toggle
-                :around 'dired-sidebar-omit-after-dired-subtree-cycle))
+                :around #'dired-sidebar-omit-after-dired-subtree-cycle))
 
   ;; This comment is taken from `dired-readin'.
   ;; Begin --- Copied comment from dired.el.
@@ -790,7 +793,7 @@ window selection."
 Select alternate window using `dired-sidebar-alternate-select-window-function'."
   (interactive)
   (let ((current-prefix-arg '(4))) ; C-u
-    (call-interactively 'dired-sidebar-find-file)))
+    (call-interactively #'dired-sidebar-find-file)))
 
 (defun dired-sidebar-up-directory ()
   "Wrapper over `dired-up-directory'."
@@ -897,11 +900,11 @@ the relevant file-directory clicked on by the mouse."
         ;; the sidebar's root directory.
         (if (eq (current-buffer) buffer)
             ;; https://github.com/Fuco1/dired-hacks/issues/102
-            (if (member 'dired-collapse-mode dired-mode-hook)
+            (if (member #'dired-collapse-mode (default-value 'dired-mode-hook))
                 (progn
-                  (remove-hook 'dired-mode-hook 'dired-collapse-mode)
+                  (remove-hook 'dired-mode-hook #'dired-collapse-mode)
                   (let ((clone (clone-buffer)))
-                    (add-hook 'dired-mode-hook 'dired-collapse-mode)
+                    (add-hook 'dired-mode-hook #'dired-collapse-mode)
                     clone))
               (clone-buffer))
           ;; Rename the buffer generated by `dired-noselect'.
@@ -1098,12 +1101,12 @@ This is somewhat experimental/hacky."
      ((and (eq dired-sidebar-theme 'icons)
            (fboundp 'all-the-icons-dired--refresh))
       ;; Refresh `all-the-icons-dired'.
-      (dired-sidebar-revert)
+      (funcall revert-buffer-function)
       (all-the-icons-dired--refresh))
      ((and (eq dired-sidebar-theme 'nerd-icons)
            (fboundp 'nerd-icons-dired--refresh))
       ;; Refresh `nerd-icons-dired'.
-      (dired-sidebar-revert)
+      (funcall revert-buffer-function)
       (nerd-icons-dired--refresh))
      ((dired-sidebar-using-tui-p)
       (dired-sidebar-tui-update-with-delay))
@@ -1178,11 +1181,11 @@ Otherwise, try to call `dired-omit-mode' after function runs."
                           (insert-image
                            (vscode-icon-for-file filename) " "))
                         (insert " "))
-                    (if (file-directory-p filename)
-                        (if (dired-subtree--is-expanded-p)
-                            (insert (concat collapsible-icon " "))
-                          (insert (concat expandable-icon " ")))
-                      (insert (if (eq dired-sidebar-theme 'nerd) "  " ""))))))))
+                    (insert (if (file-directory-p filename)
+                                (concat (if (dired-subtree--is-expanded-p)
+                                            collapsible-icon expandable-icon)
+                                        " ")
+                              (if (eq dired-sidebar-theme 'nerd) "  " ""))))))))
           (forward-line 1))))))
 
 (defun dired-sidebar-tui-update-with-delay (&rest _)
@@ -1195,20 +1198,30 @@ Otherwise, try to call `dired-omit-mode' after function runs."
   "Workhorse function to update tui interface."
   (when-let* ((buffer (dired-sidebar-buffer)))
     (with-current-buffer buffer
-      (dired-sidebar-revert)
+      (funcall revert-buffer-function)
       (when dired-sidebar-recenter-cursor-on-tui-update
         (recenter)))))
 
-(defun dired-sidebar-revert (&rest _)
-  "Wrapper around `dired-revert' but saves window position."
+(defun dired-sidebar--revert (orig-fun &rest args)
+  "Wrapper advice for `revert-buffer-function' which saves window position."
   (when-let* ((window (get-buffer-window
                        (dired-sidebar-buffer))))
     (with-selected-window window
       (let ((old-window-start (window-start)))
         (when (dired-sidebar-using-tui-p)
           (dired-sidebar-tui-reset-in-sidebar))
-        (dired-revert)
-        (set-window-start window old-window-start)))))
+        (prog1
+            (apply orig-fun args)
+          (set-window-start window old-window-start))))))
+
+(defun dired-sidebar-revert (&rest _)
+  "Refresh the sidebar buffer.
+Backward-compatible wrapper.  Prefer calling `revert-buffer' on the
+sidebar buffer directly."
+  (declare (obsolete revert-buffer "0.2.0"))
+  (when-let* ((window (get-buffer-window (dired-sidebar-buffer))))
+    (with-selected-window window
+      (revert-buffer))))
 
 (defun dired-sidebar-tui-reset-in-sidebar (&rest _)
   "Runs `dired-sidebar-tui-dired-reset' in current `dired-sidebar' buffer."
@@ -1223,10 +1236,10 @@ This is used in place of `all-the-icons' to add directory indicators.
 
 e.g. + and -."
   (add-hook 'dired-after-readin-hook
-            'dired-sidebar-tui-dired-display :append :local)
+            #'dired-sidebar-tui-dired-display :append :local)
   (setq-local dired-subtree-line-prefix dired-sidebar-subtree-line-prefix)
   (dired-build-subdir-alist)
-  (dired-sidebar-revert))
+  (funcall revert-buffer-function))
 
 (defun dired-sidebar-using-tui-p ()
   "Return t if `dired-sidebar-theme' is using tui code path."
@@ -1248,27 +1261,24 @@ e.g. + and -."
 
 (defun dired-sidebar-wdired-change-to-dired-mode-advice (f &rest args)
   "Advice for `wdired-change-to-dired-mode'."
-  (if (eq dired-sidebar-wdired-tracking-major-mode 'dired-sidebar-mode)
-      (dired-sidebar-wdired-change-to-dired-mode)
-    (apply f args)))
-
-(defun dired-sidebar-wdired-change-to-dired-mode ()
-  "Change the mode back to dired-sidebar.
-
-This is an exact copy of `wdired-change-to-dired-mode' but changes the
-`major-mode' to `dired-sidebar-mode' instead of `dired-mode'."
-  (let ((inhibit-read-only t))
-    (remove-text-properties
-     (point-min) (point-max)
-     '(front-sticky nil rear-nonsticky nil read-only nil keymap nil)))
-  (use-local-map dired-sidebar-mode-map)
-  (force-mode-line-update)
-  (setq buffer-read-only t)
-  (setq major-mode 'dired-sidebar-mode)
-  (setq mode-name "Dired-sidebar")
-  (dired-advertise)
-  (remove-hook 'kill-buffer-hook 'wdired-check-kill-buffer t)
-  (set (make-local-variable 'revert-buffer-function) 'dired-sidebar-revert))
+  (let ((sidebar (eq dired-sidebar-wdired-tracking-major-mode
+                     'dired-sidebar-mode)))
+    (if sidebar
+        ;; `dired-sidebar-wdired-change-to-wdired-mode-advice' let-binds
+        ;; `major-mode' to fool `wdired-change-to-wdired-mode', so the
+        ;; buffer-local `major-mode' is still `dired-sidebar-mode' here.
+        ;; Let-bind it to `wdired-mode' to bypass the "Not a Wdired buffer"
+        ;; check in `wdired-change-to-dired-mode'.
+        (let ((major-mode 'wdired-mode))
+          (apply f args))
+      (apply f args))
+    (when sidebar
+      ;; We're back in `dired-mode'; restore `dired-sidebar-mode' state.
+      (use-local-map dired-sidebar-mode-map)
+      (setq major-mode 'dired-sidebar-mode)
+      (setq mode-name "Dired-sidebar")
+      (add-function :around (local 'revert-buffer-function)
+                    #'dired-sidebar--revert))))
 
 (defun dired-sidebar-wdired-change-to-wdired-mode-advice (f &rest args)
   "Forward to `wdired-change-to-wdired-mode'.
