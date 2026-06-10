@@ -28,4 +28,4 @@ jobs:
       - uses: cask/setup-cask@master
       - run: cask install
       - run: make compile
-      - run: xvfb-run --auto-servernum make test
+      - run: make test

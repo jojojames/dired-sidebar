@@ -7,6 +7,6 @@ compile:
 	-f batch-byte-compile *.el
 
 test:
-	cask exec ert-runner --win
+	cask exec ert-runner
 
 .PHONY: test
