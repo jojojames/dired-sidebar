@@ -1,6 +1,6 @@
 #+TITLE: Dired Sidebar
 
-[[https://travis-ci.org/jojojames/dired-sidebar][file:https://travis-ci.org/jojojames/dired-sidebar.svg?branch=master]]
+[[https://github.com/jojojames/dired-sidebar/actions/workflows/ci.yml][file:https://github.com/jojojames/dired-sidebar/actions/workflows/ci.yml/badge.svg]]
 [[https://melpa.org/#/dired-sidebar][file:https://melpa.org/packages/dired-sidebar-badge.svg]]
 [[https://stable.melpa.org/#/dired-sidebar][file:https://stable.melpa.org/packages/dired-sidebar-badge.svg]]
 

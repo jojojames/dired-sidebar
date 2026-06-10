@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.emacs_version == 'snapshot' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        emacs_version:
+          - '29.1'
+          - '29.4'
+          - '30.1'
+          - 'snapshot'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs_version }}
+      - uses: cask/setup-cask@master
+      - run: cask install
+      - run: make compile
+      - run: xvfb-run --auto-servernum make test
