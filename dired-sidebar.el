@@ -6,7 +6,7 @@
 ;; Maintainer: James Nguyen <james@jojojames.com>
 ;; URL: https://github.com/jojojames/dired-sidebar
 ;; Version: 0.0.1
-;; Package-Requires: ((emacs "25.1") (dired-subtree "0.0.1") (compat "30.0.0.0"))
+;; Package-Requires: ((emacs "29.1") (dired-subtree "0.0.1") (compat "30.0.0.0"))
 ;; Keywords: dired, files, tools
 ;; HomePage: https://github.com/jojojames/dired-sidebar
 
@@ -690,14 +690,14 @@ This is dependent on `dired-subtree-cycle'."
     (call-interactively #'dired-sidebar-toggle-sidebar)))
 
 (defun dired-sidebar-maybe-adjust-frame-width (window &optional dec)
-  "If needed, increase (or decrease, if DEC is non-nil) the enclosing 
-frame width to accomodate for the sidebar."  
+  "If needed, increase (or decrease, if DEC is non-nil) the enclosing
+frame width to accomodate for the sidebar."
   (when dired-sidebar-adjust-frame-width
     (let ((frame (window-frame window)))
       (unless (frame-parameter frame 'fullscreen)
         (set-frame-width frame (funcall (if dec '- '+)
                                         (frame-width frame)
-                                        (window-total-width window)))))))  
+                                        (window-total-width window)))))))
 
 ;;;###autoload
 (defun dired-sidebar-show-sidebar (&optional b)
@@ -728,7 +728,7 @@ frame width to accomodate for the sidebar."
   (interactive)
   (when-let* ((buffer (dired-sidebar-buffer))
               (window (get-buffer-window buffer)))
-    (dired-sidebar-maybe-adjust-frame-width window t)         
+    (dired-sidebar-maybe-adjust-frame-width window t)
     (delete-window window)))
 
 ;;;###autoload
