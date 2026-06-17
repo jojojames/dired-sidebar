@@ -120,6 +120,23 @@ to control the width anyway."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-project-root-fn
+  #'dired-sidebar-project-root-project
+  "Function used to determine the sidebar's root directory.
+
+Called with no arguments; should return a directory.  Built-in options:
+
+- `dired-sidebar-project-root-project' uses `project.el' (default).
+- `dired-sidebar-project-root-projectile' uses `projectile'.
+
+Both fall back to `default-directory' when no project is detected.
+
+`project.el' is preferred by default because `projectile' resolves
+symlinks via `file-truename', which causes the sidebar root to differ
+from `default-directory' when the buffer was reached through a symlink."
+  :type 'function
+  :group 'dired-sidebar)
+
 (defcustom dired-sidebar-should-follow-file nil
   "Refresh sidebar to match current file."
   :type 'boolean
@@ -855,27 +872,25 @@ the relevant file-directory clicked on by the mouse."
   (get-buffer buffer-name))
 
 (defun dired-sidebar-sidebar-root ()
-  "Return directory using `projectile', `project' or current directory."
-  (if (featurep 'projectile)
-      (condition-case nil
-          (if (fboundp 'projectile-project-root)
-              (or (projectile-project-root) default-directory)
-            default-directory)
-        (error default-directory))
-    ;; Use `project' if `projectile' is not loaded yet.
-    ;; `projectile' is a big package and takes a while to load so it's better
-    ;; to defer loading it as long as possible (until the user chooses).
-    (if-let* ((pr (project-current)))
-        ;; It can happen, at least in Emacs 27.1, that
-        ;; `project-current` give a non-nil result, while
-        ;; `project-root` is undefined. Fallback to assuming that the
-        ;; directory part of `project-current` is the root. See
-        ;; https://github.com/jojojames/dired-sidebar/issues/73 for
-        ;; more details.
-        (if (fboundp 'project-root)
-            (project-root pr)
-          (cdr pr))
-      default-directory)))
+  "Return sidebar root via `dired-sidebar-project-root-fn'."
+  (funcall dired-sidebar-project-root-fn))
+
+(defun dired-sidebar-project-root-projectile ()
+  "Return project root using `projectile', else `default-directory'."
+  (require 'projectile nil :no-error)
+  (unless (featurep 'projectile)
+    (user-error
+     "`dired-sidebar-project-root-projectile' requires `projectile'"))
+  (if (fboundp 'projectile-project-root)
+      (projectile-project-root)
+    default-directory))
+
+(defun dired-sidebar-project-root-project ()
+  "Return project root using `project.el', else `default-directory'."
+  (require 'project)
+  (if-let* ((pr (project-current)))
+      (project-root pr)
+    default-directory))
 
 (defun dired-sidebar-buffer-name (dir)
   "Return name of `dired-sidebar' buffer given DIR."
