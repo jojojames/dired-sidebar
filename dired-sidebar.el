@@ -42,6 +42,7 @@
 (declare-function buffer-face-mode-invoke "face-remap")
 (declare-function dired-filter-mode "dired-filter")
 (declare-function dired-collapse-mode "ext:dired-collapse")
+(declare-function project-root "project" (project))
 (defvar dired-filter-stack)
 
 ;; Customizations
