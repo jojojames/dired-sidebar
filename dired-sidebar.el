@@ -5,7 +5,7 @@
 ;; Author: James Nguyen <james@jojojames.com>
 ;; Maintainer: James Nguyen <james@jojojames.com>
 ;; URL: https://github.com/jojojames/dired-sidebar
-;; Version: 2.0.0
+;; Version: 2.0.1
 ;; Package-Requires: ((emacs "29.1") (compat "30.0.0.0"))
 ;; Keywords: dired, files, tools
 ;; HomePage: https://github.com/jojojames/dired-sidebar
