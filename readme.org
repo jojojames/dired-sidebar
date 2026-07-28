@@ -86,12 +86,6 @@
    exist in a polished state with standard keybindings an Emacs user will already
    be familiar with. Because of this ~dired-sidebar~'s codebase can stay small and lean,
    serving as the glue to several different packages.
-** Fast
-   Having used the [[#alternatives][alternatives]] listed below, in my opinion,
-   ~dired-sidebar~ is the fastest of the bunch.
-
-   Trying to open and navigate in emacs/src/lisp (or another directory I've forgotten)
-   led to writing my own sidebar as I was not satisfied with the speed of the other drawers.
 ** Multiple Frames
    Sidebar may be used in multiple frames with each frame having its own sidebar state.
 ** File Following
@@ -101,8 +95,6 @@
    point to the current file.
 ** Mouse Support
    Close/expand folders and open files with left click.
-** Session Persistence
-   Leverages ~dired~'s ~desktop-save-mode~ support for persistence.
 ** Projectile
    Integrated with [[https://github.com/bbatsov/projectile][projectile]].
 
@@ -144,15 +136,6 @@ Can use [[https://github.com/rainstormstudio/nerd-icons-dired][nerd-icons]].
    If point was on a file in ~magit~, point at the file upon opening ~dired-sidebar~.
 ** IBuffer
    ~dired-sidebar~ will open sidebar and point at buffer's file.
-** Dependencies
-   Only ~dired-subtree~ is required. The other integrations are optional
-   and dynamically detected.
-* Alternatives
-  https://github.com/Alexander-Miller/treemacs
-
-  https://github.com/jaypei/emacs-neotree
-
-  https://github.com/sabof/project-explorer
 * Running Tests
   #+begin_src sh :tangle yes
   cask

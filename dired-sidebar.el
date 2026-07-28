@@ -6,7 +6,7 @@
 ;; Maintainer: James Nguyen <james@jojojames.com>
 ;; URL: https://github.com/jojojames/dired-sidebar
 ;; Version: 1.0.0
-;; Package-Requires: ((emacs "29.1") (dired-subtree "0.0.1") (compat "30.0.0.0"))
+;; Package-Requires: ((emacs "29.1") (compat "30.0.0.0"))
 ;; Keywords: dired, files, tools
 ;; HomePage: https://github.com/jojojames/dired-sidebar
 
@@ -36,14 +36,19 @@
 
 (require 'compat)
 (require 'dired)
-(require 'dired-subtree)
+(require 'dired-subtree nil :no-error)
 (eval-when-compile (require 'subr-x)) ; `if-let*' and `when-let*'
 
 (declare-function buffer-face-mode-invoke "face-remap")
 (declare-function dired-filter-mode "dired-filter")
 (declare-function dired-collapse-mode "ext:dired-collapse")
 (declare-function project-root "project" (project))
+(declare-function dired-subtree-cycle "ext:dired-subtree")
+(declare-function dired-subtree-toggle "ext:dired-subtree")
+(declare-function dired-subtree--is-expanded-p "ext:dired-subtree")
 (defvar dired-filter-stack)
+(defvar dired-subtree-line-prefix)
+(defvar dired-subtree-use-backgrounds)
 
 ;; Customizations
 
@@ -345,8 +350,14 @@ according to `dired-sidebar-width'"
   :type 'boolean
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-subtree-line-prefix dired-subtree-line-prefix
-  "The line prefix to use when subtree is cycled."
+(defcustom dired-sidebar-subtree-line-prefix
+  (if (boundp 'dired-subtree-line-prefix)
+      dired-subtree-line-prefix
+    "  ")
+  "The line prefix to use when subtree is cycled.
+
+Falls back to two spaces when the optional `dired-subtree' package is
+not installed."
   :type 'string
   :group 'dired-sidebar)
 
