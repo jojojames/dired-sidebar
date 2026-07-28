@@ -34,6 +34,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'compat)
 (require 'dired)
 (require 'dired-subtree nil :no-error)
