@@ -4,4 +4,5 @@
 (package-file "dired-sidebar.el")
 
 (development
- (depends-on "ert-runner"))
+ (depends-on "ert-runner")
+ (depends-on "dired-subtree"))
