@@ -177,6 +177,29 @@ When finding root directory for sidebar, use directory specified by `magit'."
   :type 'boolean
   :group 'dired-sidebar)
 
+(defcustom dired-sidebar-want-subtree t
+  "Whether to integrate with `dired-subtree'.
+
+When non-nil and `dired-subtree' is available, `dired-sidebar' expands
+and collapses directories in place using `dired-subtree-cycle' and
+`dired-subtree-toggle'.
+
+When nil, `dired-sidebar' behaves like ordinary `dired': opening a
+directory replaces the buffer contents rather than expanding a subtree,
+and `dired-sidebar-subtree-toggle' falls through to whatever binding
+its invoking key would have had in `dired-mode'."
+  :type 'boolean
+  :group 'dired-sidebar)
+
+(defun dired-sidebar-subtree-available ()
+  "Return non-nil if `dired-subtree' integration is enabled and loaded.
+
+This is true when `dired-sidebar-want-subtree' is non-nil and the
+`dired-subtree' package can be loaded."
+  (and dired-sidebar-want-subtree
+       (or (featurep 'dired-subtree)
+           (require 'dired-subtree nil :no-error))))
+
 (defcustom dired-sidebar-use-omit-mode-integration t
   "Whether to integrate with `dired-omit-mode'.
 
@@ -452,11 +475,11 @@ Works around marker pointing to wrong buffer in Emacs 25."
 
   (setq window-size-fixed dired-sidebar-window-fixed)
 
-  ;; Match backgrounds.
-  (setq-local dired-subtree-use-backgrounds nil)
-
-  ;; `dired-subtree''s line prefix is determined by `dired-sidebar'.
-  (setq-local dired-subtree-line-prefix dired-sidebar-subtree-line-prefix)
+  (when (dired-sidebar-subtree-available)
+    ;; Match backgrounds.
+    (setq-local dired-subtree-use-backgrounds nil)
+    ;; `dired-subtree''s line prefix is determined by `dired-sidebar'.
+    (setq-local dired-subtree-line-prefix dired-sidebar-subtree-line-prefix))
 
   ;; https://github.com/jojojames/dired-sidebar/issues/7
   ;; Symlinks are displayed incorrectly when these three things happen.
@@ -561,10 +584,11 @@ Works around marker pointing to wrong buffer in Emacs 25."
     (unless (memq 'dired-omit-mode
                   dired-sidebar-special-refresh-commands)
       (push 'dired-omit-mode dired-sidebar-special-refresh-commands))
-    (advice-add 'dired-subtree-cycle
-                :around #'dired-sidebar-omit-after-dired-subtree-cycle)
-    (advice-add 'dired-subtree-toggle
-                :around #'dired-sidebar-omit-after-dired-subtree-cycle))
+    (when (dired-sidebar-subtree-available)
+      (advice-add 'dired-subtree-cycle
+                  :around #'dired-sidebar-omit-after-dired-subtree-cycle)
+      (advice-add 'dired-subtree-toggle
+                  :around #'dired-sidebar-omit-after-dired-subtree-cycle)))
 
   ;; This comment is taken from `dired-readin'.
   ;; Begin --- Copied comment from dired.el.
@@ -649,6 +673,7 @@ This is dependent on `dired-subtree-cycle'."
   (let ((sidebar (dired-sidebar-buffer)))
     (pop-to-buffer sidebar)
     (when (and name
+               (dired-sidebar-subtree-available)
                ;; Checking for a private method. *shrug*
                (fboundp 'dired-subtree--is-expanded-p))
       (pop-to-buffer sidebar)
@@ -860,6 +885,7 @@ the relevant file-directory clicked on by the mouse."
     ;; `dired-subtree-cycle' works without first selecting the window.
     (with-selected-window window
       (if (and dired-sidebar-cycle-subtree-on-click
+               (dired-sidebar-subtree-available)
                (file-directory-p file)
                (not (string-suffix-p "." file)))
           (dired-subtree-cycle)
@@ -1105,10 +1131,19 @@ This is somewhat experimental/hacky."
      default-directory)))
 
 (defun dired-sidebar-subtree-toggle ()
-  "Wrapper over `dired-subtree-toggle' that accounts for `all-the-icons-dired'."
+  "Wrapper over `dired-subtree-toggle' that accounts for `all-the-icons-dired'.
+
+When `dired-sidebar-want-subtree' is nil (or `dired-subtree' is not
+available), fall through to whatever binding the invoking key would
+have had in `dired-mode'."
   (interactive)
-  (dired-subtree-toggle)
-  (dired-sidebar-redisplay-icons))
+  (if (dired-sidebar-subtree-available)
+      (progn
+        (dired-subtree-toggle)
+        (dired-sidebar-redisplay-icons))
+    (let ((cmd (lookup-key dired-mode-map (this-command-keys-vector))))
+      (when (commandp cmd)
+        (call-interactively cmd)))))
 
 (defun dired-sidebar-redisplay-icons ()
   "Redisplay icon themes unless over TRAMP."
@@ -1198,7 +1233,8 @@ Otherwise, try to call `dired-omit-mode' after function runs."
                            (vscode-icon-for-file filename) " "))
                         (insert " "))
                     (insert (if (file-directory-p filename)
-                                (concat (if (dired-subtree--is-expanded-p)
+                                (concat (if (and (dired-sidebar-subtree-available)
+                                                 (dired-subtree--is-expanded-p))
                                             collapsible-icon expandable-icon)
                                         " ")
                               (if (eq dired-sidebar-theme 'nerd) "  " ""))))))))
@@ -1253,7 +1289,8 @@ This is used in place of `all-the-icons' to add directory indicators.
 e.g. + and -."
   (add-hook 'dired-after-readin-hook
             #'dired-sidebar-tui-dired-display :append :local)
-  (setq-local dired-subtree-line-prefix dired-sidebar-subtree-line-prefix)
+  (when (dired-sidebar-subtree-available)
+    (setq-local dired-subtree-line-prefix dired-sidebar-subtree-line-prefix))
   (dired-build-subdir-alist)
   (funcall revert-buffer-function))
 
