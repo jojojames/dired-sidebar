@@ -26,6 +26,11 @@
    I recommend using [[https://github.com/jwiegley/use-package][use-package]].
 
    #+begin_src emacs-lisp :tangle yes
+(use-package dired-subtree
+  :commands (dired-subtree-toggle dired-subtree-cycle)
+  :config
+  (setq dired-subtree-line-prefix " ")
+  (setq dired-subtree-use-backgrounds nil))
 (use-package dired-sidebar
   :ensure t
   :commands (dired-sidebar-toggle-sidebar))
@@ -49,6 +54,13 @@
    #+end_src
 * My Settings
   #+begin_src emacs-lisp :tangle yes
+
+(use-package dired-subtree
+  :commands (dired-subtree-toggle dired-subtree-cycle)
+  :config
+  (setq dired-subtree-line-prefix " ")
+  (setq dired-subtree-use-backgrounds nil))
+
 (use-package dired-sidebar
   :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
   :ensure t
