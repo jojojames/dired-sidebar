@@ -1,6 +1,6 @@
 ;;; dired-sidebar.el --- Tree browser leveraging dired -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021 James Nguyen
+;; Copyright (C) 2026  Free Software Foundation, Inc.
 
 ;; Author: James Nguyen <james@jojojames.com>
 ;; Maintainer: James Nguyen <james@jojojames.com>
