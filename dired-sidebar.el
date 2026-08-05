@@ -842,24 +842,19 @@ For files, use `dired-sidebar-find-file'.
 This uses the same code as `dired-mouse-find-file-other-window' to find
 the relevant file-directory clicked on by the mouse."
   (interactive "e")
-  (let (window pos file)
-    (save-excursion
-      (setq window (posn-window (event-end event))
-            pos (posn-point (event-end event)))
-      (if (not (windowp window))
-          (error "No file chosen"))
-      (set-buffer (window-buffer window))
-      (goto-char pos)
-      (setq file (dired-get-file-for-visit)))
-    ;; There's a flicker doing this but it doesn't seem like
-    ;; `dired-subtree-cycle' works without first selecting the window.
-    (with-selected-window window
-      (if (and dired-sidebar-cycle-subtree-on-click
-               (dired-sidebar-subtree-available)
-               (file-directory-p file)
-               (not (string-suffix-p "." file)))
-          (dired-subtree-cycle)
-        (dired-sidebar-find-file file))))
+  (let ((window (posn-window (event-end event)))
+		(pos (posn-point (event-end event)))
+		file)
+	(unless (windowp window)
+	  (error "No file chosen"))
+	(with-selected-window window
+	  (goto-char pos)
+	  (setq file (dired-get-file-for-visit))
+	  (if (and dired-sidebar-cycle-subtree-on-click
+			   (file-directory-p file)
+			   (not (string-suffix-p "." file)))
+		  (dired-subtree-cycle)
+		(dired-sidebar-find-file file))))
   (dired-sidebar-redisplay-icons))
 
 ;; Helpers
