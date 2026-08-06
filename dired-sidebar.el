@@ -851,6 +851,7 @@ the relevant file-directory clicked on by the mouse."
 	  (goto-char pos)
 	  (setq file (dired-get-file-for-visit))
 	  (if (and dired-sidebar-cycle-subtree-on-click
+			   (dired-sidebar-subtree-available)
 			   (file-directory-p file)
 			   (not (string-suffix-p "." file)))
 		  (dired-subtree-cycle)
